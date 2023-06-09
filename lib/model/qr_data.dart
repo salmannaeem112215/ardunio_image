@@ -18,7 +18,7 @@ class QrData {
   factory QrData.fromJson(String jsonString) {
     final Map<String, dynamic> json = jsonDecode(jsonString);
     return QrData(
-      name: json[name_],
+      name: json[name_] == null ? 'IN_VALID' : json[name_]!,
       address: json[address_] == null ? 'IN_VALID' : json[address_]!,
       pin: json[pin_] == null ? 'IN_VALID' : json[pin_]!,
     );
