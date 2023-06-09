@@ -1,6 +1,4 @@
 import 'package:ardunio_image/headers.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../controller/qr_controller.dart';
@@ -27,22 +25,33 @@ class QrScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  validator: ,
+                  keyboardType: TextInputType.name,
                   controller: _qrController.name,
                   decoration: kInputDecoration('Name'),
                   onChanged: (val) => _qrController.valueChanges(),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  keyboardType: TextInputType.text,
                   controller: _qrController.address,
                   decoration: kInputDecoration('Address'),
                   onChanged: (val) => _qrController.valueChanges(),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
+                  // validator: (value) => ,
+                  keyboardType: TextInputType.phone,
                   controller: _qrController.pincode,
                   decoration: kInputDecoration('PIN Code'),
                   onChanged: (val) => _qrController.valueChanges(),
                 ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                    onPressed: () {
+                      _qrController.scanQr();
+                    },
+                    child: const Text('Scan Devices'))
               ],
             ),
           ),
@@ -60,3 +69,4 @@ kInputDecoration(String lable) => InputDecoration(
       floatingLabelBehavior: FloatingLabelBehavior.always,
       labelStyle: const TextStyle(fontSize: 18),
     );
+

@@ -1,4 +1,5 @@
 import 'package:ardunio_image/headers.dart';
+import 'package:ardunio_image/model/qr_data.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
@@ -15,8 +16,10 @@ class QrController extends GetxController {
   }
 
   void valueChanges() {
-    qrValue.value =
-        'Address: ${address.text}\nName: ${name.text}\nPIN Code: ${pincode.text}';
+    final qr =
+        QrData(name: name.text, address: address.text, pin: pincode.text);
+    qrValue.value = json.encode(qr.toJson());
+    print(qr.toJson());
   }
 
   Future<void> scanQr() async {
@@ -27,8 +30,24 @@ class QrController extends GetxController {
         true,
         ScanMode.BARCODE,
       );
-
-      print(scannedQrCode.value);
+      if (scannedQrCode.value == '-1') {
+        Get.snackbar('QR Scanner ', 'Scanning Process Canceled');
+      } else {
+        extractValues(scannedQrCode.value);
+      }
+      print('Thes Values areeeee :${scannedQrCode.value}');
     } on PlatformException {}
   }
+
+  void extractValues(String inputString) {
+    print('INPUT STRING $inputString');
+    final qr = QrData.fromJson(inputString);
+    name.text = qr.name;
+    address.text = qr.address;
+    pincode.text = qr.pin;
+  }
+
+// Example usage
+  final inputString =
+      'Address: "HC:00:00:00:00"\nName: "John Doe"\nPIN Code: "123456"';
 }
