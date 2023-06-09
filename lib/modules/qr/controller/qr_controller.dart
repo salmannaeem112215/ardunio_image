@@ -1,7 +1,4 @@
 import 'package:ardunio_image/headers.dart';
-import 'package:ardunio_image/model/qr_data.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class QrController extends GetxController {
   final name = TextEditingController();
@@ -34,6 +31,7 @@ class QrController extends GetxController {
         Get.snackbar('QR Scanner ', 'Scanning Process Canceled');
       } else {
         extractValues(scannedQrCode.value);
+        valueChanges();
       }
       print('Thes Values areeeee :${scannedQrCode.value}');
     } on PlatformException {}

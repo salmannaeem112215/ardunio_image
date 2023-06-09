@@ -1,5 +1,4 @@
 import 'package:ardunio_image/headers.dart';
-import 'package:ardunio_image/modules/qr_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +11,8 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // return GetMaterialApp(home: MainPage());
-    return GetMaterialApp(home: QrScreen());
+    return const GetMaterialApp(
+      home: QrScreen(),
+    );
   }
 }

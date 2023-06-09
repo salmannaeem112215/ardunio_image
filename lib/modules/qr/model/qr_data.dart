@@ -1,4 +1,4 @@
-import '../headers.dart';
+import 'package:ardunio_image/headers.dart';
 
 class QrData {
   final String name;

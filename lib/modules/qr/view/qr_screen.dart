@@ -1,7 +1,4 @@
 import 'package:ardunio_image/headers.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-
-import '../controller/qr_controller.dart';
 
 class QrScreen extends StatelessWidget {
   const QrScreen({super.key});
