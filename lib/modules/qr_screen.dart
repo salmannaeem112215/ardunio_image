@@ -25,7 +25,6 @@ class QrScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  validator: ,
                   keyboardType: TextInputType.name,
                   controller: _qrController.name,
                   decoration: kInputDecoration('Name'),
@@ -69,4 +68,3 @@ kInputDecoration(String lable) => InputDecoration(
       floatingLabelBehavior: FloatingLabelBehavior.always,
       labelStyle: const TextStyle(fontSize: 18),
     );
-
