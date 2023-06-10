@@ -21,16 +21,6 @@ class MainPage extends StatelessWidget {
                     _bluetoothController.enableBluetooth();
                   },
                 ),
-                ElevatedButton(
-                    onPressed: () async {
-                      const d = BluetoothDevice(
-                        address: '0021:09:00106E',
-                        name: 'HC-05',
-                      );
-
-                      _startChat(context, d);
-                    },
-                    child: Text('Addresss')),
                 ListTile(
                   title: const Text('Bluetooth status'),
                   subtitle: Text(
@@ -58,39 +48,9 @@ class MainPage extends StatelessWidget {
                       child: const Text('Connect to paired device to chat'),
                       onPressed: () async {
                         Get.toNamed(AppPages.selectDevice);
-                        //   final BluetoothDevice selectedDevice =
-                        //       await Navigator.of(context).push(
-                        //     MaterialPageRoute(
-                        //       builder: (context) {
-                        //         return SelectBondedDevicePage(
-                        //             checkAvailability: false);
-                        //       },
-                        //     ),
-                        //   );
-
-                        //   if (selectedDevice != null) {
-                        //     print('Connect -> selected ' + selectedDevice.address);
-                        //     _bluetoothController
-                        //         .connectToDevice(selectedDevice.address);
-                        //     _startChat(context, selectedDevice);
-                        //   } else {
-                        //     print('Connect -> no device selected');
-                        //   }
-                        // },
                       }),
                 ),
               ],
             )));
-  }
-
-  void _startChat(BuildContext context, BluetoothDevice server) {
-    print('HI');
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     builder: (context) {
-    //       return ChatPage(server: server);
-    //     },
-    //   ),
-    // );
   }
 }

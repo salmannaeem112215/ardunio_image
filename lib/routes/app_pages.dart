@@ -11,8 +11,8 @@ class AppPages {
   static List<GetPage> routes() => [
         GetPage(
           name: home,
-          page: () => MainPage(),
-          // binding: HomeBinding(),
+          page: () => const HomeScreen(),
+          binding: HomeBinding(),
         ),
         GetPage(
           name: scan,

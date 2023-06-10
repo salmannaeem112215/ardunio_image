@@ -11,6 +11,7 @@ export 'package:qr_flutter/qr_flutter.dart';
 export 'package:get/get_instance/src/bindings_interface.dart';
 
 export './routes/app_pages.dart';
+export './constants/icons_path.dart';
 
 export './modules/SelectBondedDevicePage.dart';
 export './modules/MainPage.dart';
@@ -18,6 +19,11 @@ export './modules/MainPage.dart';
 export './modules/qr/model/qr_data.dart';
 export './modules/qr/controller/qr_controller.dart';
 export './modules/qr/view/qr_screen.dart';
+
+export './modules/home/binding/home_binding.dart';
+export './modules/home/controller/home_controller.dart';
+export './modules/home/view/home_screen.dart';
+export './modules/home/view/bluetooth_disable.dart';
 
 export './modules/select_device/select_device_List_tile.dart';
 export './modules/select_device/select_device_controller.dart';
