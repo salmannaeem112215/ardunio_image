@@ -20,7 +20,29 @@ class BluetoothEnable extends StatelessWidget {
         HomeTile(
           image: IconPath.scan,
           text: 'Scan Qr Code to .. \nConnect with device.     ',
-          onTap: hc.openBluetoothSettings,
+          onTap: () async {
+            final qrData = await Get.find<QrController>().scanQr();
+            if (qrData == null) {
+              Get.snackbar('Scanning Cancel', 'Qr Scanning Mode Cancel');
+            } else {
+              //get Bluetooth Devices and connect it
+              final devices = await hc.scanDevice();
+              BluetoothDevice? deviceToConnect;
+              for (var element in devices) {
+                if (element.address == qrData.address) {
+                  deviceToConnect = element;
+                }
+              }
+              if (deviceToConnect == null) {
+                Get.snackbar(
+                  'Error Device Pairing',
+                  'Device is not paired with your phone. please go to Bluetooth Setting to pair device',
+                );
+              } else {
+                print('hi');
+              }
+            }
+          },
           color: const Color(0xff285680),
           label: 'Scan Now',
           iconWidth: 130,

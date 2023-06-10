@@ -44,6 +44,11 @@ class HomeController extends GetxController {
     instance.openSettings();
   }
 
+  Future<List<BluetoothDevice>> scanDevice() async {
+    final devices = await instance.getBondedDevices();
+    return devices;
+  }
+
   // Future<void> connectToDevice(String deviceAddress) async {
   //   await _communication.connectBl(deviceAddress);
   //   _communication.sendMessage("Hello");

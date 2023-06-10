@@ -19,7 +19,7 @@ class QrController extends GetxController {
     print(qr.toJson());
   }
 
-  Future<void> scanQr() async {
+  Future<QrData?> scanQr() async {
     try {
       scannedQrCode.value = await FlutterBarcodeScanner.scanBarcode(
         '#666666',
@@ -28,13 +28,13 @@ class QrController extends GetxController {
         ScanMode.BARCODE,
       );
       if (scannedQrCode.value == '-1') {
-        Get.snackbar('QR Scanner ', 'Scanning Process Canceled');
+        return null;
       } else {
-        extractValues(scannedQrCode.value);
-        valueChanges();
+        return QrData.fromJson(scannedQrCode.value);
       }
-      print('Thes Values areeeee :${scannedQrCode.value}');
-    } on PlatformException {}
+    } on PlatformException {
+      return null;
+    }
   }
 
   void extractValues(String inputString) {
