@@ -37,13 +37,16 @@ class SelectDeviceController extends GetxController {
   void startDiscovery() {
     _discoveryStreamSubscription =
         FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
-      print('Dsicovery Result  $r');
-      for (var d in devices) {
-        if (d.device == r.device) {
-          d.availability = DeviceAvailability.yes;
-          d.rssi = r.rssi;
-        }
-      }
+      FlutterBluetoothSerial.instance
+          .getBondedDevices()
+          .then((List<BluetoothDevice> bondedDevices) {
+        devices.value = bondedDevices
+            .map((device) =>
+                DeviceWithAvailability(device, DeviceAvailability.maybe, 1))
+            .toList();
+        doUpdate();
+        update();
+      });
       doUpdate();
 
       update();

@@ -1,6 +1,8 @@
 import 'package:ardunio_image/headers.dart';
 
 class BluetoothController extends GetxController {
+  final instance = FlutterBluetoothSerial.instance;
+
   Rx<BluetoothState> bluetoothState = BluetoothState.UNKNOWN.obs;
   Rx<String> address = "...".obs;
   Rx<String> name = "...".obs;
@@ -15,7 +17,6 @@ class BluetoothController extends GetxController {
   }
 
   Future<void> _initBluetoothState() async {
-    final instance = FlutterBluetoothSerial.instance;
     bluetoothState.value = await instance.state;
     address.value = await instance.address ?? '';
     name.value = await instance.name ?? '';
@@ -40,16 +41,16 @@ class BluetoothController extends GetxController {
   // this module will tell to on the phone bluetooth
   void enableBluetooth() async {
     if (bluetoothState.value.isEnabled) {
-      await FlutterBluetoothSerial.instance.requestDisable();
+      await instance.requestDisable();
     } else {
-      await FlutterBluetoothSerial.instance.requestEnable();
+      await instance.requestEnable();
     }
     // bluetoothState.value = await FlutterBluetoothSerial.instance.state;
   }
 
   void openBluetoothSettings() {
     print('Going to OPen Bluetooth');
-    FlutterBluetoothSerial.instance.openSettings();
+    instance.openSettings();
   }
 
   Future<void> connectToDevice(String deviceAddress) async {
