@@ -1,4 +1,6 @@
 import 'package:ardunio_image/headers.dart';
+import 'package:ardunio_image/modules/home/view/bluetooth_enable.dart';
+import 'package:ardunio_image/modules/home/view/home_tile.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -17,25 +19,32 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.white70,
       ),
       body: SafeArea(
-          child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Obx(
-              () => SwitchListTile(
-                title: const Text('Enable Bluetooth'),
-                value: hc.bluetoothState.value.isEnabled,
-                onChanged: (bool value) async {
-                  hc.enableBluetooth();
-                },
+          child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Obx(
+                () => HomeTile(
+                  image: IconPath.bluetooth,
+                  text: 'Please enable Bluetooth\n to connect with device',
+                  widget: Switch(
+                    value: hc.bluetoothState.value.isEnabled,
+                    onChanged: (c) => hc.enableBluetooth(),
+                  ),
+                  label: '',
+                  onTap: () {},
+                  color: Colors.white,
+                ),
               ),
-            ),
-            const Divider(),
-            Obx(
-              () => hc.bluetoothState.value.isEnabled != true
-                  ? const BluetoothDisable()
-                  : const Text('Good To Go'),
-            ),
-          ],
+              const Divider(),
+              Obx(
+                () => hc.bluetoothState.value.isEnabled != true
+                    ? const BluetoothDisable()
+                    : const BluetoothEnable(),
+              ),
+            ],
+          ),
         ),
       )),
     );

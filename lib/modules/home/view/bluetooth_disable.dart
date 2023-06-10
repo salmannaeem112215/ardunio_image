@@ -9,7 +9,7 @@ class BluetoothDisable extends StatelessWidget {
       children: [
         Image.asset(
           IconPath.bluetoothError,
-          height: 400,
+          height: 300,
         ),
         const Text(
           'Opps!\nBluetooth not enabled',
