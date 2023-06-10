@@ -1,7 +1,4 @@
 import 'package:ardunio_image/headers.dart';
-import 'package:ardunio_image/modules/home/view/bluetooth_enable.dart';
-import 'package:ardunio_image/modules/home/view/home_tile.dart';
-import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

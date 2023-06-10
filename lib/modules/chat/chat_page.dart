@@ -1,6 +1,4 @@
 import 'package:ardunio_image/headers.dart';
-import 'package:ardunio_image/modules/chat/controller/chat_controller.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 class _Message {
   int whom;
@@ -17,7 +15,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  static final clientID = 0;
+  static const clientID = 0;
   BluetoothConnection? connection;
 
   List<_Message> messages = <_Message>[];
@@ -41,15 +39,14 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     Get.find<ChatController>().connectedDevice = hc.conBDevice;
-    BluetoothConnection.toAddress(hc.conBDevice!.address).then((_connection) {
-      connection = _connection;
+    BluetoothConnection.toAddress(hc.conBDevice!.address).then((con) {
+      connection = con;
       setState(() {
         isConnecting = false;
         isDisconnecting = false;
       });
 
       connection!.input!.listen(_onDataReceived).onDone(() {
-        print('HIIIIIIIIIAMI');
         if (isDisconnecting) {
           Get.snackbar('Disconnecting', 'Disconnecting locally!');
           Get.back();
@@ -83,37 +80,44 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final cc = Get.find<ChatController>();
 
-    final List<Row> list = messages.map((_message) {
+    final List<Row> list = messages.map((message) {
       return Row(
-        children: <Widget>[
+        mainAxisAlignment: message.whom == clientID
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
+        children: [
           Container(
-            child: Text(
-                (text) {
-                  return text == '/shrug' ? '¯\\_(ツ)_/¯' : text;
-                }(_message.text.trim()),
-                style: TextStyle(color: Colors.white)),
-            padding: EdgeInsets.all(12.0),
-            margin: EdgeInsets.only(bottom: 8.0, left: 8.0, right: 8.0),
+            padding: const EdgeInsets.all(12.0),
+            margin: const EdgeInsets.only(bottom: 8.0, left: 8.0, right: 8.0),
             width: 222.0,
             decoration: BoxDecoration(
                 color:
-                    _message.whom == clientID ? Colors.blueAccent : Colors.grey,
+                    message.whom == clientID ? Colors.blueAccent : Colors.grey,
                 borderRadius: BorderRadius.circular(7.0)),
+            child: Text(
+                (text) {
+                  return text == '/shrug' ? '¯\\_(ツ)_/¯' : text;
+                }(message.text.trim()),
+                style: const TextStyle(color: Colors.white)),
           ),
         ],
-        mainAxisAlignment: _message.whom == clientID
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
       );
     }).toList();
 
     return Scaffold(
       appBar: AppBar(
-          title: (isConnecting
-              ? Text('Connecting chat to ${cc.connectedDevice!.name}...')
+        title: Text(
+          (isConnecting
+              ? 'Connecting chat to ${cc.connectedDevice!.name}...'
               : isConnected
-                  ? Text('Live chat with ${cc.connectedDevice!.name}')
-                  : Text('Chat log with ${cc.connectedDevice!.name}'))),
+                  ? 'Live chat with ${cc.connectedDevice!.name}'
+                  : 'Chat log with ${cc.connectedDevice!.name}'),
+          style: const TextStyle(color: Colors.black),
+        ),
+        elevation: 1,
+        backgroundColor: Colors.white70,
+        iconTheme: const IconThemeData(color: Colors.black54),
+      ),
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -162,11 +166,11 @@ class _ChatScreenState extends State<ChatScreen> {
   void _onDataReceived(Uint8List data) {
     // Allocate buffer for parsed data
     int backspacesCounter = 0;
-    data.forEach((byte) {
+    for (var byte in data) {
       if (byte == 8 || byte == 127) {
         backspacesCounter++;
       }
-    });
+    }
     Uint8List buffer = Uint8List(data.length - backspacesCounter);
     int bufferIndex = buffer.length;
 
@@ -212,19 +216,19 @@ class _ChatScreenState extends State<ChatScreen> {
     text = text.trim();
     textEditingController.clear();
 
-    if (text.length > 0) {
+    if (text.isNotEmpty) {
       try {
-        connection!.output.add(Uint8List.fromList(utf8.encode(text + "\r\n")));
+        connection!.output.add(Uint8List.fromList(utf8.encode("$text\r\n")));
         await connection!.output.allSent;
 
         setState(() {
           messages.add(_Message(clientID, text));
         });
 
-        Future.delayed(Duration(milliseconds: 333)).then((_) {
+        Future.delayed(const Duration(milliseconds: 333)).then((_) {
           listScrollController.animateTo(
               listScrollController.position.maxScrollExtent,
-              duration: Duration(milliseconds: 333),
+              duration: const Duration(milliseconds: 333),
               curve: Curves.easeOut);
         });
       } catch (e) {

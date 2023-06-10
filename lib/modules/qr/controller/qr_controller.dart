@@ -16,7 +16,6 @@ class QrController extends GetxController {
     final qr =
         QrData(name: name.text, address: address.text, pin: pincode.text);
     qrValue.value = json.encode(qr.toJson());
-    print(qr.toJson());
   }
 
   Future<QrData?> scanQr() async {
@@ -38,7 +37,6 @@ class QrController extends GetxController {
   }
 
   void extractValues(String inputString) {
-    print('INPUT STRING $inputString');
     final qr = QrData.fromJson(inputString);
     name.text = qr.name;
     address.text = qr.address;

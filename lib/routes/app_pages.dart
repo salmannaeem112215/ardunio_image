@@ -1,6 +1,4 @@
 import 'package:ardunio_image/headers.dart';
-import 'package:ardunio_image/modules/chat/binding/chat_binding.dart';
-import 'package:ardunio_image/modules/qr/binding/qr_binding.dart';
 
 class AppPages {
   static const String home = '/';
@@ -14,16 +12,6 @@ class AppPages {
           name: home,
           page: () => const HomeScreen(),
           binding: HomeBinding(),
-        ),
-        GetPage(
-          name: scan,
-          page: () => const QrScreen(),
-          binding: QrBindings(),
-        ),
-        GetPage(
-          name: selectDevice,
-          page: () => const SelectDeviceScreen(),
-          binding: SelectDeviceBinding(),
         ),
         GetPage(
           name: chat,

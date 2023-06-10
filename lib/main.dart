@@ -16,7 +16,6 @@ class MainApp extends StatelessWidget {
       title: 'Ardunio Image',
       initialRoute: AppPages.initial,
       getPages: AppPages.routes(),
-      initialBinding: BluetoothBinding(),
     );
   }
 }

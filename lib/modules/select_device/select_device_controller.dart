@@ -1,92 +1,88 @@
-import 'package:ardunio_image/headers.dart';
+// import 'package:ardunio_image/headers.dart';
 
-class SelectDeviceController extends GetxController {
-  RxList<DeviceWithAvailability> devices = <DeviceWithAvailability>[].obs;
-  final toUpdate = false.obs;
-  final isDiscovering = false.obs;
-  StreamSubscription<BluetoothDiscoveryResult>? _discoveryStreamSubscription;
+// class SelectDeviceController extends GetxController {
+//   RxList<DeviceWithAvailability> devices = <DeviceWithAvailability>[].obs;
+//   final toUpdate = false.obs;
+//   final isDiscovering = false.obs;
+//   StreamSubscription<BluetoothDiscoveryResult>? _discoveryStreamSubscription;
 
-  Rx<BluetoothDevice> selectedDevice =
-      const BluetoothDevice(address: 'asdsadas').obs;
+//   Rx<BluetoothDevice> selectedDevice =
+//       const BluetoothDevice(address: 'asdsadas').obs;
 
-  @override
-  void onInit() {
-    super.onInit();
+//   @override
+//   void onInit() {
+//     super.onInit();
 
-    isDiscovering.value = true;
+//     isDiscovering.value = true;
 
-    startDiscovery();
+//     startDiscovery();
 
-    FlutterBluetoothSerial.instance
-        .getBondedDevices()
-        .then((List<BluetoothDevice> bondedDevices) {
-      devices.value = bondedDevices
-          .map((device) =>
-              DeviceWithAvailability(device, DeviceAvailability.maybe, 1))
-          .toList();
-      doUpdate();
-      update();
-    });
-  }
+//     FlutterBluetoothSerial.instance
+//         .getBondedDevices()
+//         .then((List<BluetoothDevice> bondedDevices) {
+//       devices.value = bondedDevices
+//           .map((device) =>
+//               DeviceWithAvailability(device, DeviceAvailability.maybe, 1))
+//           .toList();
+//       doUpdate();
+//       update();
+//     });
+//   }
 
-  doUpdate() {
-    print('update Called');
-    toUpdate.value = !toUpdate.value;
-  }
+//   doUpdate() {
+//     toUpdate.value = !toUpdate.value;
+//   }
 
-  void startDiscovery() {
-    print('Hiii');
+//   void startDiscovery() {
+//     // FlutterBluetoothSerial.instance.getBondedDevices().then((List<BluetoothDevice> bondedDevices) => null)
+//     _discoveryStreamSubscription =
+//         FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
+//       FlutterBluetoothSerial.instance
+//           .getBondedDevices()
+//           .then((List<BluetoothDevice> bondedDevices) {
+//         devices.value = bondedDevices
+//             .map((device) =>
+//                 DeviceWithAvailability(device, DeviceAvailability.maybe, 1))
+//             .toList();
+//         doUpdate();
+//         update();
+//       });
+//       doUpdate();
 
-    // FlutterBluetoothSerial.instance.getBondedDevices().then((List<BluetoothDevice> bondedDevices) => null)
-    _discoveryStreamSubscription =
-        FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
-      print('Changed Occure');
-      FlutterBluetoothSerial.instance
-          .getBondedDevices()
-          .then((List<BluetoothDevice> bondedDevices) {
-        devices.value = bondedDevices
-            .map((device) =>
-                DeviceWithAvailability(device, DeviceAvailability.maybe, 1))
-            .toList();
-        doUpdate();
-        update();
-      });
-      doUpdate();
+//       update();
+//     });
 
-      update();
-    });
+//     _discoveryStreamSubscription!.onDone(() {
+//       isDiscovering.value = false;
+//       doUpdate();
+//       update();
+//     });
+//   }
 
-    _discoveryStreamSubscription!.onDone(() {
-      isDiscovering.value = false;
-      doUpdate();
-      update();
-    });
-  }
+//   void restartDiscovery() {
+//     isDiscovering.value = true;
+//     startDiscovery();
+//     doUpdate();
+//     update();
+//   }
 
-  void restartDiscovery() {
-    isDiscovering.value = true;
-    startDiscovery();
-    doUpdate();
-    update();
-  }
+//   @override
+//   void onClose() {
+//     _discoveryStreamSubscription?.cancel();
+//     super.onClose();
+//   }
+// }
 
-  @override
-  void onClose() {
-    _discoveryStreamSubscription?.cancel();
-    super.onClose();
-  }
-}
+// class DeviceWithAvailability {
+//   BluetoothDevice device;
+//   DeviceAvailability availability;
+//   int rssi;
 
-class DeviceWithAvailability {
-  BluetoothDevice device;
-  DeviceAvailability availability;
-  int rssi;
+//   DeviceWithAvailability(this.device, this.availability, this.rssi);
+// }
 
-  DeviceWithAvailability(this.device, this.availability, this.rssi);
-}
-
-enum DeviceAvailability {
-  no,
-  maybe,
-  yes,
-}
+// enum DeviceAvailability {
+//   no,
+//   maybe,
+//   yes,
+// }
