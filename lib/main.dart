@@ -11,8 +11,12 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // return GetMaterialApp(home: MainPage());
-    return const GetMaterialApp(
-      home: QrScreen(),
+    return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Ardunio Image',
+      initialRoute: AppPages.initial,
+      getPages: AppPages.routes(),
+      initialBinding: BluetoothBinding(),
     );
   }
 }

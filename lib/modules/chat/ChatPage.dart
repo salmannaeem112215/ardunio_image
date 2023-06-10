@@ -1,14 +1,5 @@
 import 'package:ardunio_image/headers.dart';
 
-class ChatPage extends StatefulWidget {
-  final BluetoothDevice server;
-
-  const ChatPage({required this.server});
-
-  @override
-  _ChatPage createState() => new _ChatPage();
-}
-
 class _Message {
   int whom;
   String text;
@@ -16,7 +7,14 @@ class _Message {
   _Message(this.whom, this.text);
 }
 
-class _ChatPage extends State<ChatPage> {
+class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
   static final clientID = 0;
   BluetoothConnection? connection;
 
@@ -34,10 +32,10 @@ class _ChatPage extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
+    final sc = Get.find<SelectDeviceController>();
 
-    BluetoothConnection.toAddress('40:8E:F6:54:8E:48').then((_connection) {
-      print('sdadfaf');
-      print('Connected to the device');
+    BluetoothConnection.toAddress(sc.selectedDevice.value!.address)
+        .then((_connection) {
       connection = _connection;
       setState(() {
         isConnecting = false;
@@ -45,25 +43,21 @@ class _ChatPage extends State<ChatPage> {
       });
 
       connection!.input!.listen(_onDataReceived).onDone(() {
-        print('HIdsadasdas');
-        // Example: Detect which side closed the connection
-        // There should be `isDisconnecting` flag to show are we are (locally)
-        // in middle of disconnecting process, should be set before calling
-        // `dispose`, `finish` or `close`, which all causes to disconnect.
-        // If we except the disconnection, `onDone` should be fired as result.
-        // If we didn't except this (no flag set), it means closing by remote.
+        print('HIIIIIIIIIAMI');
         if (isDisconnecting) {
-          print('Disconnecting locally!');
+          Get.snackbar('Disconnecting', 'Disconnecting locally!');
+          Get.back();
         } else {
-          print('Disconnected remotely!');
+          Get.snackbar('Disconnecting', 'Disconnected remotely!');
+          Get.back();
         }
-        if (this.mounted) {
+        if (mounted) {
           setState(() {});
         }
       });
     }).catchError((error) {
-      print('Cannot connect, exception occured');
-      print(error);
+      Get.snackbar('exception occured', 'Cannot connect, exception occured');
+      Get.back();
     });
   }
 
@@ -81,6 +75,8 @@ class _ChatPage extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final sc = Get.find<SelectDeviceController>();
+
     final List<Row> list = messages.map((_message) {
       return Row(
         children: <Widget>[
@@ -108,10 +104,10 @@ class _ChatPage extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
           title: (isConnecting
-              ? Text('Connecting chat to ${widget.server.name}...')
+              ? Text('Connecting chat to ${sc.selectedDevice.value.name}...')
               : isConnected
-                  ? Text('Live chat with ${widget.server.name}')
-                  : Text('Chat log with ${widget.server.name}'))),
+                  ? Text('Live chat with ${sc.selectedDevice.value.name}')
+                  : Text('Chat log with ${sc.selectedDevice.value.name}'))),
       body: SafeArea(
         child: Column(
           children: <Widget>[

@@ -55,28 +55,29 @@ class MainPage extends StatelessWidget {
                 ListTile(title: const Text('Devices discovery and connection')),
                 ListTile(
                   title: ElevatedButton(
-                    child: const Text('Connect to paired device to chat'),
-                    onPressed: () async {
-                      final BluetoothDevice selectedDevice =
-                          await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return SelectBondedDevicePage(
-                                checkAvailability: false);
-                          },
-                        ),
-                      );
+                      child: const Text('Connect to paired device to chat'),
+                      onPressed: () async {
+                        Get.toNamed(AppPages.selectDevice);
+                        //   final BluetoothDevice selectedDevice =
+                        //       await Navigator.of(context).push(
+                        //     MaterialPageRoute(
+                        //       builder: (context) {
+                        //         return SelectBondedDevicePage(
+                        //             checkAvailability: false);
+                        //       },
+                        //     ),
+                        //   );
 
-                      if (selectedDevice != null) {
-                        print('Connect -> selected ' + selectedDevice.address);
-                        _bluetoothController
-                            .connectToDevice(selectedDevice.address);
-                        _startChat(context, selectedDevice);
-                      } else {
-                        print('Connect -> no device selected');
-                      }
-                    },
-                  ),
+                        //   if (selectedDevice != null) {
+                        //     print('Connect -> selected ' + selectedDevice.address);
+                        //     _bluetoothController
+                        //         .connectToDevice(selectedDevice.address);
+                        //     _startChat(context, selectedDevice);
+                        //   } else {
+                        //     print('Connect -> no device selected');
+                        //   }
+                        // },
+                      }),
                 ),
               ],
             )));
@@ -84,12 +85,12 @@ class MainPage extends StatelessWidget {
 
   void _startChat(BuildContext context, BluetoothDevice server) {
     print('HI');
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          return ChatPage(server: server);
-        },
-      ),
-    );
+    // Navigator.of(context).push(
+    //   MaterialPageRoute(
+    //     builder: (context) {
+    //       return ChatPage(server: server);
+    //     },
+    //   ),
+    // );
   }
 }

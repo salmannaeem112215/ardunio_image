@@ -17,7 +17,9 @@ class Communication {
       // Creates a listener to receive data
       connection!.input!.listen(onDataReceived).onDone(() {});
     }).catchError((error) {
-      print('Cannot connect, exception occured');
+      Get.snackbar('Connection Error1', 'Cannot connect, exception occured');
+      Get.back();
+      // Get.toNamed(AppPages.selectDevice);
     });
   }
 

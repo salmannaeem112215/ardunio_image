@@ -15,13 +15,26 @@ class BluetoothController extends GetxController {
   }
 
   Future<void> _initBluetoothState() async {
-    bluetoothState.value = await FlutterBluetoothSerial.instance.state;
-    address.value = await FlutterBluetoothSerial.instance.address ?? '';
-    name.value = await FlutterBluetoothSerial.instance.name ?? '';
+    final instance = FlutterBluetoothSerial.instance;
+    bluetoothState.value = await instance.state;
+    address.value = await instance.address ?? '';
+    name.value = await instance.name ?? '';
 
-    FlutterBluetoothSerial.instance.onStateChanged().listen((state) {
-      bluetoothState.value = state;
-    });
+    instance.onStateChanged().listen(
+          (state) => setBluetoothSate(state),
+        );
+  }
+
+  void setBluetoothSate(BluetoothState state) {
+    bluetoothState.value = state;
+    if (state == BluetoothState.STATE_BLE_TURNING_OFF ||
+        state == BluetoothState.STATE_OFF) {
+      if (Get.currentRoute != AppPages.home) {
+        Get.snackbar(
+            'Bluetooth Disconnected', 'Please Turn on Your Bluetooth ');
+        Get.toNamed(AppPages.home);
+      }
+    }
   }
 
   // this module will tell to on the phone bluetooth
