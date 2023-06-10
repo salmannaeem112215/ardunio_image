@@ -1,4 +1,6 @@
 import 'package:ardunio_image/headers.dart';
+import 'package:ardunio_image/modules/chat/controller/chat_controller.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 class _Message {
   int whom;
@@ -32,10 +34,14 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    final sc = Get.find<SelectDeviceController>();
+    final hc = Get.find<HomeController>();
+    if (hc.conBDevice == null) {
+      Get.snackbar('Error', 'Try Again');
+      Get.back();
+    }
 
-    BluetoothConnection.toAddress(sc.selectedDevice.value!.address)
-        .then((_connection) {
+    Get.find<ChatController>().connectedDevice = hc.conBDevice;
+    BluetoothConnection.toAddress(hc.conBDevice!.address).then((_connection) {
       connection = _connection;
       setState(() {
         isConnecting = false;
@@ -75,7 +81,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final sc = Get.find<SelectDeviceController>();
+    final cc = Get.find<ChatController>();
 
     final List<Row> list = messages.map((_message) {
       return Row(
@@ -104,10 +110,10 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
           title: (isConnecting
-              ? Text('Connecting chat to ${sc.selectedDevice.value.name}...')
+              ? Text('Connecting chat to ${cc.connectedDevice!.name}...')
               : isConnected
-                  ? Text('Live chat with ${sc.selectedDevice.value.name}')
-                  : Text('Chat log with ${sc.selectedDevice.value.name}'))),
+                  ? Text('Live chat with ${cc.connectedDevice!.name}')
+                  : Text('Chat log with ${cc.connectedDevice!.name}'))),
       body: SafeArea(
         child: Column(
           children: <Widget>[

@@ -24,6 +24,7 @@ class BluetoothEnable extends StatelessWidget {
             final qrData = await Get.find<QrController>().scanQr();
             if (qrData == null) {
               Get.snackbar('Scanning Cancel', 'Qr Scanning Mode Cancel');
+              hc.conBDevice = null;
             } else {
               //get Bluetooth Devices and connect it
               final devices = await hc.scanDevice();
@@ -38,8 +39,10 @@ class BluetoothEnable extends StatelessWidget {
                   'Error Device Pairing',
                   'Device is not paired with your phone. please go to Bluetooth Setting to pair device',
                 );
+                hc.conBDevice = null;
               } else {
-                print('hi');
+                hc.conBDevice = deviceToConnect;
+                Get.toNamed(AppPages.chat);
               }
             }
           },

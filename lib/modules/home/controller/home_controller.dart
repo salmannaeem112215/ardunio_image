@@ -4,6 +4,7 @@ class HomeController extends GetxController {
   final instance = FlutterBluetoothSerial.instance;
 
   Rx<BluetoothState> bluetoothState = BluetoothState.UNKNOWN.obs;
+  BluetoothDevice? conBDevice = null;
 
   @override
   void onInit() {

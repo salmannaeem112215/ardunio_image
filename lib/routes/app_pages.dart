@@ -1,4 +1,5 @@
 import 'package:ardunio_image/headers.dart';
+import 'package:ardunio_image/modules/chat/binding/chat_binding.dart';
 import 'package:ardunio_image/modules/qr/binding/qr_binding.dart';
 
 class AppPages {
@@ -27,6 +28,7 @@ class AppPages {
         GetPage(
           name: chat,
           page: () => const ChatScreen(),
+          binding: ChatBinding(),
         ),
       ];
 }
