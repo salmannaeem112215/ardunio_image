@@ -24,7 +24,7 @@ class QrController extends GetxController {
         '#666666',
         'Cancel',
         true,
-        ScanMode.BARCODE,
+        ScanMode.QR,
       );
       if (scannedQrCode.value == '-1') {
         return null;
