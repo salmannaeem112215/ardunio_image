@@ -5,7 +5,7 @@ class HomeTile extends StatelessWidget {
     super.key,
     required this.image,
     required this.text,
-    required this.onTap,
+    this.onTap,
     this.color = Colors.blue,
     this.label = '',
     this.iconWidth = 100,
@@ -15,7 +15,7 @@ class HomeTile extends StatelessWidget {
   final String text;
   final String label;
   final Color color;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final double iconWidth;
   final Widget? widget;
   @override

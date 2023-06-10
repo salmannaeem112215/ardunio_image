@@ -33,7 +33,6 @@ class HomeScreen extends StatelessWidget {
                     onChanged: (c) => hc.enableBluetooth(),
                   ),
                   label: '',
-                  onTap: () {},
                   color: Colors.white,
                 ),
               ),
