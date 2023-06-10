@@ -14,9 +14,6 @@ export 'package:flutter/foundation.dart';
 export './routes/app_pages.dart';
 export './constants/icons_path.dart';
 
-export 'modules/select_bonded_device_page.dart';
-export 'modules/main_page.dart';
-
 export './modules/qr/model/qr_data.dart';
 export './modules/qr/controller/qr_controller.dart';
 export './modules/qr/binding/qr_binding.dart';
