@@ -27,10 +27,6 @@ export './modules/home/view/bluetooth_enable.dart';
 
 export './modules/chat/model/message.dart';
 export './modules/chat/controller/chat_controller.dart';
-// export './modules/chat/view/chat_screen.dart';
+export './modules/chat/view/chat_screen.dart';
 export './modules/chat/binding/chat_binding.dart';
 export './modules/chat/view/message_tile.dart';
-
-// export './modules/chat/controller/chat_controller.dart';
-export 'modules/chat/chat_page.dart';
-export './modules/chat/communication.dart';

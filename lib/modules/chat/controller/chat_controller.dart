@@ -13,6 +13,7 @@ class ChatController extends GetxController {
   String _messageBuffer = '';
 
   final TextEditingController textEditingController = TextEditingController();
+  RxBool isTyping = false.obs;
   final ScrollController listScrollController = ScrollController();
 
   doUpdate() {
@@ -196,6 +197,10 @@ class ChatController extends GetxController {
     }
 
     doUpdate();
+  }
+
+  clearChat() {
+    messages.clear();
   }
 }
 

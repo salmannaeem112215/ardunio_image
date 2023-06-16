@@ -3,4 +3,5 @@ class IconPath {
   static const String warning = 'assets/icons/warning.png';
   static const String scan = 'assets/icons/scan.png';
   static const String bluetooth = 'assets/icons/bluetooth.png';
+  static const String noMessage = 'assets/icons/chat.png';
 }
