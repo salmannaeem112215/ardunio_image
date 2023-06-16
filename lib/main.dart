@@ -15,6 +15,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Ardunio Image',
       initialRoute: AppPages.initial,
+      initialBinding: HomeBinding(),
       getPages: AppPages.routes(),
     );
   }

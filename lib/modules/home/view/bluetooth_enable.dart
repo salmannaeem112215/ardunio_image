@@ -41,6 +41,7 @@ class BluetoothEnable extends StatelessWidget {
                 hc.conBDevice = null;
               } else {
                 hc.conBDevice = deviceToConnect;
+                // Get.find<ChatController>().connectToDevice();
                 Get.toNamed(AppPages.chat);
               }
             }

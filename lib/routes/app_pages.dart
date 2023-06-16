@@ -11,12 +11,12 @@ class AppPages {
         GetPage(
           name: home,
           page: () => const HomeScreen(),
-          binding: HomeBinding(),
+          // binding: HomeBinding(),
         ),
         GetPage(
           name: chat,
           page: () => const ChatScreen(),
-          binding: ChatBinding(),
+          // binding: ChatBinding(),
         ),
       ];
 }
