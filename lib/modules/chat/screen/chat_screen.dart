@@ -1,7 +1,4 @@
 import 'package:ardunio_image/headers.dart';
-import 'package:ardunio_image/modules/chat/view/message_box.dart';
-import 'package:ardunio_image/modules/chat/view/message_list.dart';
-import 'package:ardunio_image/modules/chat/view/no_message.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});

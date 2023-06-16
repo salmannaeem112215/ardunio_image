@@ -31,7 +31,9 @@
     <application
         android:label="Ardunio Image"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:requestLegacyExternalStorage="true"        
+        >
         
         
         

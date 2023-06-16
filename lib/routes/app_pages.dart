@@ -4,6 +4,7 @@ class AppPages {
   static const String home = '/';
   static const String scan = '/scan';
   static const String chat = '/chat';
+  static const String image = '/image';
   static const String selectDevice = '/selectDevice';
   static const String initial = home;
 
@@ -17,6 +18,11 @@ class AppPages {
           name: chat,
           page: () => const ChatScreen(),
           // binding: ChatBinding(),
+        ),
+        GetPage(
+          name: image,
+          page: () => const ImageScreen(),
+          binding: ImageBinding(),
         ),
       ];
 }

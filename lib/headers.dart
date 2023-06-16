@@ -10,6 +10,10 @@ export 'package:qr_flutter/qr_flutter.dart';
 export 'package:get/get_instance/src/bindings_interface.dart';
 export 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 export 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+export 'package:image_cropper/image_cropper.dart';
+export 'package:image_picker/image_picker.dart';
+export 'package:flutter_image_compress/flutter_image_compress.dart';
+export 'package:clipboard/clipboard.dart';
 
 export './routes/app_pages.dart';
 export './constants/icons_path.dart';

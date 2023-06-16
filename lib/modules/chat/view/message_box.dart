@@ -61,7 +61,7 @@ class MessageBox extends StatelessWidget {
                   iconSize: 30,
                   icon: const Icon(Icons.image),
                   onPressed: cc.isConnected
-                      ? () => cc.sendMessage(cc.textEditingController.text)
+                      ? () => Get.toNamed(AppPages.image)
                       : null),
             );
           }
