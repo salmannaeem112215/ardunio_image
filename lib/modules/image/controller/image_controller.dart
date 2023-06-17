@@ -1,9 +1,6 @@
 import 'dart:io';
-import 'dart:ui' as ui;
-import 'package:flutter_native_image/flutter_native_image.dart';
 import 'package:image/image.dart' as imagi;
 import 'package:ardunio_image/headers.dart';
-import 'package:image/image.dart';
 
 enum ImageState { select, selected, croped, uploading, completed }
 
@@ -23,130 +20,45 @@ class ImageController extends GetxController {
   Future<List<Uint8List>> extractGifFrames(File img) async {
     final List<Uint8List> imagess = [];
     final bytes = await img.readAsBytes();
-    // print('Unavle');
-
     final decoder = imagi.GifDecoder();
     decoder.decode(bytes);
-
     print('frames ${decoder.numFrames()}');
     for (int i = 0; i < decoder.numFrames(); i++) {
       final decodedImg = decoder.decodeFrame(i);
 
-      // final compressImg = copyResize(
-      //   decodedImg!,
-      //   width: 16,
-      //   height: 16,
-      //   // interpolation: Interpolation
-      // );
-      // print('${compressImg!.height} x ${compressImg!.width}');
-      // final croppedImg = copyCrop(
-      //   // compressImg,
-      //   decodedImg!,
-      //   x: 0,
-      //   y: 0,
-      //   width: 16,
-      //   height: 16,
-      // ); // Adjust the crop dimensions as desired
-      final decodedBytes = decodedImg!.getBytes(order: imagi.ChannelOrder.rgb);
-
-      print('${decodedImg!.height} x ${decodedImg!.width}');
-
       final dir = Directory.systemTemp;
       final targetPath = '${dir.absolute.path}/temp${i}.jpg';
-      final newSourcetargetPath = '${dir.absolute.path}/c-temp${i}.jpg';
-      final ins = imagi.encodeJpg(decodedImg, quality: 100);
+      final ins = imagi.encodeJpg(decodedImg!, quality: 100);
       final val = await imagi.writeFile(targetPath, ins);
 
-      print('is Success $val');
-      // final cropImageFile = await ImageCropper().cropImage(
-      //   sourcePath: targetPath,
-      //   maxHeight: 16,
-      //   maxWidth: 16,
-      //   aspectRatio:
-      //       CropAspectRatio(ratioY: 16.toDouble(), ratioX: 16.toDouble()),
-      //   compressFormat: ImageCompressFormat.jpg,
-      //   compressQuality: 100,
-      // );
-
-      // if (cropImageFile == null) {
-      //   Get.snackbar('Error', 'Please Select Image Again');
-      //   state.value = ImageState.select;
-      //   print('HI Error');
-      //   // return;
-      // }
-      // selectedImagePath.value = cropImageFile!.path;
-      final cropImageFile = await ImageCropper().cropImage(
-        sourcePath: targetPath,
-        maxHeight: 16,
-        maxWidth: 16,
-        aspectRatio:
-            CropAspectRatio(ratioY: 16.toDouble(), ratioX: 16.toDouble()),
-        compressFormat: ImageCompressFormat.jpg,
-        compressQuality: 100,
-      );
-
-      if (cropImageFile == null) {
-        Get.snackbar('Error', 'Please Select Image Again');
-        state.value = ImageState.select;
-        print('HI Error');
-        // return;
-      }
-
-      print('No Erro ${cropImageFile!.path}');
-      cropImagePath.value = cropImageFile!.path;
-      cropImageSize.value = _getFileSize(cropImagePath.value);
-      state.value = ImageState.croped;
-
-      final compressedFile = await FlutterImageCompress.compressAndGetFile(
-        cropImagePath.value,
-        newSourcetargetPath,
-        minHeight: 16,
-        minWidth: 16,
-        quality: 100,
-      );
-      if (compressedFile == null) {
-        Get.snackbar('Error', 'Unable To Compress Image, Please Try Again');
-        state.value = ImageState.select;
-      }
-      print('Comrepss path ${compressedFile!.path}');
-      print('Comrepss path ${newSourcetargetPath}');
-      final v = await convertImage(newSourcetargetPath, height: 16, width: 16);
+      final v = await convertImage(targetPath, height: 16, width: 16);
       // final v = await readFile(newSourcetargetPath);
 
       print(v!.length);
       print(v.toString());
-
       state.value = ImageState.select;
-      selectedImagePath.value = newSourcetargetPath;
+      selectedImagePath.value = targetPath;
       state.value = ImageState.croped;
-      await Future.delayed(Duration(seconds: 2));
-      // // final decodedBytes = decodedImg.getBytes(order: imagi.ChannelOrder.rgb);
-      // print('in Read Image');
-      // print('Decoded Bytes Length ${decodedBytes.length}');
-      // print('Decoded Bytes $decodedBytes');
+
       imagess.add(v);
-      // return decodedBytes;
-      // do something with frame
     }
     return imagess;
   }
 
   void getImage(ImageSource imageSource,
       {int height = 16, int width = 16}) async {
-    // final pickedFile = await ImagePicker().pickImage(
-    //   source: imageSource,
-    // );
-    // if (pickedFile == null) {
-    //   Get.snackbar('Error', 'Please Select Image Again');
-    //   state.value = ImageState.select;
-    //   return;
-    // }
+    final pickedFile = await ImagePicker().pickImage(
+      source: imageSource,
+    );
+    if (pickedFile == null) {
+      Get.snackbar('Error', 'Please Select Image Again');
+      state.value = ImageState.select;
+      return;
+    }
 
-    // selectedImagePath.value = '';
-    // compressImagePath.value = '';
-    // selectedImagePath.value = pickedFile!.path;
-    selectedImagePath.value =
-        '/data/user/0/com.example.ardunio_image/code_cache/c-temp7.jpg';
+    selectedImagePath.value = '';
+    compressImagePath.value = '';
+    selectedImagePath.value = pickedFile.path;
     selectedImageSize.value = _getFileSize(selectedImagePath.value);
     state.value = ImageState.selected;
 //    Crop File
@@ -190,12 +102,6 @@ class ImageController extends GetxController {
     state.value = ImageState.croped;
     print('Here');
     readImage(File(compressImagePath.value));
-
-    // uploadImage(comressFiles);
-    // } else {
-    //   Get.snackbar('Error', 'No Image Selected',
-    //       snackPosition: SnackPosition.BOTTOM);
-    // }
   }
 
   Future<Uint8List?> convertImage(String imgPath,
@@ -203,6 +109,7 @@ class ImageController extends GetxController {
     selectedImagePath.value = imgPath;
     selectedImageSize.value = _getFileSize(selectedImagePath.value);
     state.value = ImageState.selected;
+
 //    Crop File
     print('Height $height Width $width');
     final cropImageFile = await ImageCropper().cropImage(
@@ -241,15 +148,9 @@ class ImageController extends GetxController {
     }
     compressImagePath.value = compressedFile!.path;
     compressImageSize.value = _getFileSize(compressImagePath.value);
+    // selectedI
     state.value = ImageState.croped;
-    print('Here');
     return await readImage(File(compressImagePath.value));
-
-    // uploadImage(comressFiles);
-    // } else {
-    //   Get.snackbar('Error', 'No Image Selected',
-    //       snackPosition: SnackPosition.BOTTOM);
-    // }
   }
 
   List<String> imgArray = [];
@@ -264,30 +165,6 @@ class ImageController extends GetxController {
     print('${decodedImg!.height} x ${decodedImg!.width}');
 
     return decodedBytes;
-    // int loopLimit = decodedImg.width * decodedImg.height;
-    // // int loopLimit = 1000;
-    // for (int i = 0; i < decodedImg.height; i++) {
-    //   for (int j = 0; j < decodedImg.width; j++) {
-    //     int red = decodedBytes[(i * j) * 3];
-    //     int green = decodedBytes[(i * j) * 3 + 1];
-    //     int blue = decodedBytes[(i * j) * 3 + 2];
-    //     imgArray.add(convertToHex([red, green, blue]));
-    //   }
-    // }
-
-    // print('ImageArrayLength : ${imgArray.length}');
-    // print('content : ${imgArray.toString()}');
-
-    // String d = '';
-    // for (int i = 0; i < decodedImg.height; i++) {
-    //   for (int j = 0; j < decodedImg.width; j++) {
-    //     d += '${imgArray[i]}, ';
-    //   }
-    //   d += '\n';
-    // }
-    // for (int i = 0; i < 256; i++) {}
-    // FlutterClipboard.copy(d)
-    //     .then((value) => Get.snackbar('Coppied', 'Valued Coppied '));
   }
 
   void getGifImage(ImageSource imageSource,
@@ -309,137 +186,10 @@ class ImageController extends GetxController {
     state.value = ImageState.selected;
     state.value = ImageState.croped;
 
-    // final dir = Directory.systemTemp;
-    // // final targetPath = '${dir.absolute.path}/temp.jpeg';
-    // final targetPath = '${dir.absolute.path}/temp.webp';
-
-    // final compressedFile = await FlutterImageCompress.compressAndGetFile(
-    //   // cropImagePath.value,
-    //   selectedImagePath.value,
-    //   targetPath,
-    //   quality: 90,
-    //   format: CompressFormat.webp,
-    // );
-
-    // if (compressedFile == null) {
-    //   Get.snackbar('Error', 'Unable To Compress Image, Please Try Again');
-    //   state.value = ImageState.select;
-    // }
-
-    // print(' Length is ${await compressedFile!.length()}');
-    // compressImagePath.value = compressedFile!.path;
-    // compressImageSize.value = _getFileSize(compressImagePath.value);
-    // state.value = ImageState.croped;
-
-    // // final cropImageFile = await ImageCropper().cropImage(
-    // //   sourcePath: selectedImagePath.path,
-    // //   aspectRatio:
-    // //       CropAspectRatio(ratioX: width.toDouble(), ratioY: height.toDouble()),
-    // // );
-
-    // // if (cropImageFile == null) {
-    // //   Get.snackbar('Error', 'Please Select Image Again');
-    // //   state.value = ImageState.select;
-    // //   print('HI Error');
-    // //   return;
-    // // }
-
-    // // print('No Erro ${cropImageFile!.path}');
-    // // cropImagePath.value = croppedImageFile.path;
-    // cropImagePath.value = compressImagePath.value;
-    // cropImageSize.value = _getFileSize(cropImagePath.value);
-    // state.value = ImageState.croped;
-
-    // final s = await extractGifFrames(File(compressImagePath.value));
-    print(selectedImagePath.value);
     final s = await extractGifFrames(
       File(selectedImagePath.value),
     );
     print(s.length);
-    // readGifImage(File(cropImagePath.value));
-  }
-
-  Future<Uint8List> readGifImage(File img) async {
-    print('Read Image Path  ${img.path} path');
-    imgArray.clear();
-    final bytes = await img.readAsBytes();
-    // final decoder = imagi.WebPDecoder();
-    final decoder = imagi.GifDecoder();
-    // final decoder = imagi.GifDecoder();
-    try {
-      final decodedImg = decoder.decode(bytes);
-
-      if (decodedImg == null) {
-        Get.snackbar('Erro ', 'Decoded null');
-      } else {
-        print(' No of frames  ${decodedImg.frames.length}');
-        final decodedBytes =
-            decodedImg!.getBytes(order: imagi.ChannelOrder.rgb);
-        print('in Read Image');
-        print('Decoded Bytes Length ${decodedBytes.length}');
-        print('Decoded Bytes $decodedBytes');
-        return decodedBytes;
-      }
-    } catch (e) {
-      print('Errro $e');
-    }
-    return Uint8List(2);
-  }
-
-  // Future<List<List<int>>> extractGifFrames(String gifFilePath) async {
-  //   final gifBytes = await FlutterImageCompress.compressWithFile(
-  //     gifFilePath,
-  //     minWidth: 0,
-  //     minHeight: 0,
-  //     quality: 100,
-  //     format: CompressFormat.gif,
-  //   );
-
-  //   final gifData = GifData(gifBytes);
-  //   final frameCount = gifData.frameCount;
-  //   final frames = <List<int>>[];
-
-  //   for (var i = 0; i < frameCount; i++) {
-  //     final frame = gifData.frame(i).frameBytes;
-  //     frames.add(frame);
-  //   }
-
-  //   return frames;
-  // }
-
-  List<String> convertToHexString(List<List<int>> rgbList) {
-    List<String> hexList = [];
-    print('RGB LENGTH IS  ${rgbList.length / 16}');
-
-    for (List<int> rgb in rgbList) {
-      final String hex = rgb
-          .map((int value) => value.toRadixString(16).padLeft(2, '0'))
-          .join('');
-      String hexValue = '0x$hex';
-      hexList.add(hexValue);
-    }
-
-    return hexList;
-  }
-
-  void sendRgbArrayToArduino(List<List<int>> rgbArray) {
-    print('HI');
-    // Convert RGB array to a character array
-    final charArray = <String>[];
-    for (final row in rgbArray) {
-      for (final pixel in row) {
-        final char = String.fromCharCode(pixel);
-        print('HIII $char');
-        charArray.add(char);
-      }
-    }
-
-    // Send the character array to Arduino
-    final arduinoData = charArray.join();
-    // TODO: Implement code to send data to Arduino
-    print('Arduinio Data  $arduinoData');
-    print(arduinoData);
-    // FlutterClip
   }
 
   String _getFileSize(String path) {
@@ -447,55 +197,8 @@ class ImageController extends GetxController {
   }
 }
 
-String convertToHex(List<int> rgbValues) {
-  String hexValue = '';
 
-  for (int value in rgbValues) {
-    String hex = value.toRadixString(16).padLeft(2, '0');
-    hexValue += hex;
-  }
 
-  return '0x$hexValue';
-}
-
-// Future<List<List<int>>> imageToRGBArray(Image image) async {
-//   // Convert Flutter Image to Uint8List
-//   // image.image.
-//   // final ByteData byteData = await image.image.toByteData(format: ImageByteFormat.rawRgba);
-//   // final Uint8List imageData = byteData.buffer.asUint8List();
-
-//   // Compress image using flutter_image_compress
-//   // final compressedData = await FlutterImageCompress.compressWithList(imageData,
-//       // minHeight: 1, minWidth: 1, format: CompressFormat.png);
-
-//   // Decode the compressed image into an RGB array using the image package
-//   // final decodedImage = imagi.decodeImage(compressedData);
-
-//   // Extract RGB values from the decoded image and return as a 2D array
-//   final rgbArray = <List<int>>[];
-//   // for (var y = 0; y < decodedImage.height; y++) {
-//     // final row = <int>[];
-//     // for (var x = 0; x < decodedImage.width; x++) {
-//       // final pixel = decodedImage.getPixel(x, y);
-//       // final r = img.getRed(pixel);
-//       // final g = img.getGreen(pixel);
-//       // final b = img.getBlue(pixel);
-//       // row.add(r);
-//       // row.add(g);
-//       // row.add(b);
-//     // }
-//     // rgbArray.add(row);
-//   }
-
-//   // return rgbArray;
-// }
-
-// for (int x = 0; x < 256; x++) {
-//   int red = decodedBytes[x * 3];
-//   int green = decodedBytes[x * 3 + 1];
-//   int blue = decodedBytes[x * 3 + 2];
-//   imgArray.add([red, green, blue]);
-// }
 
 // 0xf6ffff,0xf7ffff,0xfafef0,0xfbfff1,0xfffbff,0xfffaff,0xfbfffa,0xfbfffa,0xfbfffa,0xfbfffa,0xfffaff,0xfffbff,0xfbfff1,0xfafef0,0xf7ffff,0xf6ffff,
 // 0xf7ffff,0xf3fdff,0xfefff4,0xfbfff1,0xfffbff,0xfffbff,0xf6fdf5,0xf8fff7,0xf8fff7,0xf6fdf5,0xfffbff,0xfffbff,0xfbfff1,0xfefff4,0xf3fdff,0xf7ffff,
