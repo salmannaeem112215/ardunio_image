@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ardunio_image/headers.dart';
 import 'package:ardunio_image/modules/image/view/no_image.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import '../view/gallary_button.dart';
 
@@ -13,39 +14,38 @@ class ImageScreen extends StatelessWidget {
     final ImageController ic = Get.put(ImageController());
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 500,
-                    width: double.infinity,
-                    child: Center(
-                      child: Obx(() {
-                        if (ic.selectedImagePath.value.isEmpty) {
-                          return const NoImage();
-                        } else {
-                          return Image.file(File(ic.selectedImagePath.value));
-                        }
-                      }),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 500,
+                      width: double.infinity,
+                      child: Center(
+                        child: Obx(() {
+                          if (ic.selectedImagePath.value.isEmpty) {
+                            return const NoImage();
+                          } else {
+                            return Image.file(File(ic.selectedImagePath.value));
+                          }
+                        }),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: GallaryButton(
-        onTap: () {},
-      ),
-    );
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: GallaryButton(
+          onTap: () {},
+        ));
   }
 }
 

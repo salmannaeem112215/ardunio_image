@@ -3,6 +3,8 @@ import 'package:image/image.dart' as imagi;
 import 'package:ardunio_image/headers.dart';
 
 class ImageController extends GetxController {
+  GlobalKey one = GlobalKey();
+
   final selectedImagePath = ''.obs;
   final selectedImageSize = ''.obs;
   final size = const Size(16, 16).obs;
