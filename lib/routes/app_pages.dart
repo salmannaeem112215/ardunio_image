@@ -6,7 +6,8 @@ class AppPages {
   static const String chat = '/chat';
   static const String image = '/image';
   static const String selectDevice = '/selectDevice';
-  static const String initial = image;
+  static const String initial = home;
+  // static const String initial = image;
 
   static List<GetPage> routes() => [
         GetPage(

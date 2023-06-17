@@ -1,5 +1,7 @@
 import 'package:ardunio_image/headers.dart';
 
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as bb;
+
 class HomeController extends GetxController {
   final instance = FlutterBluetoothSerial.instance;
 
@@ -34,6 +36,8 @@ class HomeController extends GetxController {
 
   // this module will tell to on the phone bluetooth
   void enableBluetooth() async {
+    print('Bluetooth State is ${bb.BluetoothBondState} ');
+
     if (bluetoothState.value.isEnabled) {
       await instance.requestDisable();
     } else {

@@ -7,4 +7,6 @@ class IconPath {
   // static const String noImage = 'assets/icons/no_picture.png';
   static const String noImage = 'assets/icons/penguin.png';
   static const String openGallary = 'assets/icons/open_gallry.png';
+  static const String send = 'assets/icons/send.png';
+  static const String uploading = 'assets/icons/uploading.gif';
 }
