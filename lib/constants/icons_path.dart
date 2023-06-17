@@ -4,4 +4,7 @@ class IconPath {
   static const String scan = 'assets/icons/scan.png';
   static const String bluetooth = 'assets/icons/bluetooth.png';
   static const String noMessage = 'assets/icons/chat.png';
+  // static const String noImage = 'assets/icons/no_picture.png';
+  static const String noImage = 'assets/icons/penguin.png';
+  static const String openGallary = 'assets/icons/open_gallry.png';
 }

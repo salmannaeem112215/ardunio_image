@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:ardunio_image/headers.dart';
+import 'package:ardunio_image/modules/image/view/no_image.dart';
+
+import '../view/gallary_button.dart';
 
 class ImageScreen extends StatelessWidget {
   const ImageScreen({super.key});
@@ -17,47 +20,30 @@ class ImageScreen extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
                     height: 500,
-                    child: Obx(() {
-                      if (ic.selectedImagePath.value.isEmpty) {
-                        return const Text('Please Select Image');
-                      } else {
-                        return Image.file(File(ic.selectedImagePath.value));
-                      }
-                    }),
+                    width: double.infinity,
+                    child: Center(
+                      child: Obx(() {
+                        if (ic.selectedImagePath.value.isEmpty) {
+                          return const NoImage();
+                        } else {
+                          return Image.file(File(ic.selectedImagePath.value));
+                        }
+                      }),
+                    ),
                   ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 500,
-                    child: Obx(() {
-                      print('value chagned ${ic.compressImagePath.value}');
-                      if (ic.compressImagePath.value.isEmpty) {
-                        return const Text('Please Select Image');
-                      } else {
-                        return Image.file(File(ic.compressImagePath.value));
-                      }
-                    }),
-                  ),
-                  const SizedBox(height: 20),
-                  Divider(),
-                  ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        padding: const EdgeInsets.all(16),
-                      ),
-                      onPressed: () => ic.getImage(ImageSource.gallery),
-                      child: const Text(
-                        'Select Image',
-                        style: TextStyle(fontSize: 18),
-                      )),
-                  const SizedBox(height: 30),
                 ],
               ),
             ),
           ),
         ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: GallaryButton(
+        onTap: () {},
       ),
     );
   }
