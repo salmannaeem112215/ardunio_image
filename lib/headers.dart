@@ -41,4 +41,9 @@ export './modules/chat/view/message_tile.dart';
 export './modules/image/binding/image_binding.dart';
 export './modules/image/controller/image_controller.dart';
 export './modules/image/screen/image_screen.dart';
+export './modules/image/view/floating_action_buttons.dart';
+export './modules/image/view/no_image.dart';
+export './modules/image/view/uploading.dart';
+export './modules/image/view/gallary_button.dart';
+
 // export './modules/image/view/view1.dart';

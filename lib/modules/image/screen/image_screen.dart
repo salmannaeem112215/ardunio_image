@@ -1,11 +1,6 @@
 import 'dart:io';
 
 import 'package:ardunio_image/headers.dart';
-import 'package:ardunio_image/modules/image/view/floating_action_buttons.dart';
-import 'package:ardunio_image/modules/image/view/no_image.dart';
-import 'package:ardunio_image/modules/image/view/uploading.dart';
-
-import '../view/gallary_button.dart';
 
 class ImageScreen extends StatelessWidget {
   const ImageScreen({super.key});
@@ -13,10 +8,14 @@ class ImageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ImageController ic = Get.put(ImageController());
-    final heightR = 16;
-    final widthR = 16;
-    final ratio = heightR / widthR;
     return Scaffold(
+        appBar: AppBar(
+          title: const Text('Image Upload'),
+          titleTextStyle: const TextStyle(
+              color: Colors.black, fontSize: 20, fontWeight: FontWeight.w500),
+          backgroundColor: Colors.white,
+          iconTheme: const IconThemeData(color: Colors.black),
+        ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -37,7 +36,6 @@ class ImageScreen extends StatelessWidget {
                           }
                           if (state == ImageState.select ||
                               ic.selectedImagePath.value.isEmpty) {
-                            print('No Image');
                             return const NoImage();
                           }
                           if (state == ImageState.selected) {
@@ -48,7 +46,8 @@ class ImageScreen extends StatelessWidget {
                                     color: Colors.black54,
                                     width: 3,
                                   )),
-                              height: (context.width - 32) * ratio,
+                              height:
+                                  (context.width - 32) * ic.height / ic.width,
                               child: Image.file(
                                 File(ic.selectedImagePath.value),
                                 fit: BoxFit.contain,
@@ -83,14 +82,13 @@ kInputDecoration(String lable) => InputDecoration(
 
 copyDataToClipboard(List<Uint8List> list) {
   final ic = Get.find<ImageController>();
-  String val = '[{\n';
-  list.forEach((element) {
+  String val = '[';
+  for (var element in list) {
+    val += '{\n';
     val += ic.uint8ToString(element);
     val += '}\n';
-    // print(element.length);
-    // print(element.toString());
-  });
-  val += ']';
+  }
+  val += ']\n';
 
   FlutterClipboard.copy(val).then((value) => Get.snackbar('Value Copeid', ''));
 }

@@ -15,6 +15,5 @@ class MessageList extends StatelessWidget {
         controller: cc.listScrollController,
       ),
     );
-    ;
   }
 }

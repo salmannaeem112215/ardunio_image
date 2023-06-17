@@ -1,7 +1,5 @@
 import 'package:ardunio_image/headers.dart';
 
-import 'gallary_button.dart';
-
 class FloatingActionButtons extends StatelessWidget {
   const FloatingActionButtons({super.key});
 
@@ -16,6 +14,7 @@ class FloatingActionButtons extends StatelessWidget {
           GallaryButton(
             img: IconPath.openGallary,
             onTap: () async {
+              // Get.back();
               ic.state.value = ImageState.select;
               final list = await ic.getImage(ImageSource.gallery);
               if (list.isEmpty) {
@@ -37,8 +36,6 @@ class FloatingActionButtons extends StatelessWidget {
                 if (res == true) {
                   Get.snackbar('Image Upload', 'Succes');
                   ic.state.value = ImageState.selected;
-
-                  Get.back();
                 } else {
                   Get.snackbar('Failed', 'Try Again');
                   ic.state.value = ImageState.select;

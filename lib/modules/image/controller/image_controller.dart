@@ -64,7 +64,6 @@ class ImageController extends GetxController {
       }
 
       final imgPath = await _storeFile(decodedImg, no: i);
-      print(' Image Path $imgPath');
       if (imgPath == null) {
         Get.snackbar('Error',
             'Unable to Create temporary image- Free some storagte and try again');
@@ -84,7 +83,6 @@ class ImageController extends GetxController {
 
   Future<Uint8List?> _convertJpg(String filePath, {int no = 0}) async {
     // crop file
-    print('To Cropped Image Path $filePath');
     final cropImageFile = await _cropFile(filePath);
     if (cropImageFile == null) {
       Get.snackbar('Error', 'Please Select Image Again');
@@ -99,7 +97,6 @@ class ImageController extends GetxController {
       return null;
     }
     selectedImagePath.value = cropImageFile.path;
-    print('To Compressed Image Path ${compressedFile.path}');
     return await _imageToUint8List(File(compressedFile.path));
   }
 

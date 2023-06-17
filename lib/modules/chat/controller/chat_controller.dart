@@ -73,59 +73,8 @@ class ChatController extends GetxController {
   void sendMessage(String text) async {
     text = text.trim();
     textEditingController.clear();
-
-    if (text == '3') {
-      startUpload();
-      return;
-    }
-
     if (text.isNotEmpty) {
-      try {
-        List<int> messageBytes = [];
-        pic1.forEach((element) {
-          messageBytes
-              .add((element >> 16) & 0xFF); // Most significant byte (MSB)
-          messageBytes.add((element >> 8) & 0xFF); // Middle byte
-          messageBytes.add(element & 0xFF); // Least significant byte (LSB)
-        });
-
-        messageBytes.insert(0, 16); // width
-        messageBytes.insert(0, 16); // length
-        messageBytes.insert(0, 1); // images
-
-        messageBytes.add(10);
-
-        int chunkSize = 60;
-        int totalChunks = (messageBytes.length / chunkSize).ceil();
-
-        for (int i = 0; i < totalChunks; i++) {
-          int start = i * chunkSize;
-          int end = (i + 1) * chunkSize;
-          end = end > messageBytes.length ? messageBytes.length : end;
-
-          List<int> chunk = messageBytes.sublist(start, end);
-          connection!.output.add(Uint8List.fromList(chunk));
-          await connection!.output.allSent;
-          await Future.delayed(Duration(milliseconds: 200));
-          print('Chunk $start - $end');
-        }
-
-        // TODO: setState
-        // setState(() {
-        messages.add(Message(clientID, pic2.toString()));
-        // });
-
-        Future.delayed(const Duration(milliseconds: 333)).then((_) {
-          listScrollController.animateTo(
-            listScrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 333),
-            curve: Curves.easeOut,
-          );
-        });
-      } catch (e) {
-        // Ignore error, but notify state
-        doUpdate();
-      }
+      sendCustomMessage(text);
     }
   }
 
@@ -147,19 +96,6 @@ class ChatController extends GetxController {
     try {
       int chunkSize = 60;
       int totalChunks = (data.length / chunkSize).ceil();
-      final index = data.length - 1;
-      print('Starting value is ${data[0]}${data[1]}${data[2]}');
-      print('Data 0  ${data[0]}  ${images[0][0]}');
-      print('Data 1  ${data[1]}  ${images[0][1]}');
-      print('Data 2  ${data[2]}  ${images[0][2]}');
-      print('Data end  ${data[index - 4]}  ${images[1][753]}');
-      print('Data end ${data[index - 3]}  ${images[1][754]}');
-      print('Data end  ${data[index - 2]}  ${images[1][755]}');
-      print('Data end  ${data[index - 1]}  ');
-      print('Data end  ${data[index - 0]}  ');
-      print(
-          'Ending value is ${data[index - 4]}${data[index - 3]}${data[index - 2]}');
-      print('Ending value is ${data[index - 1]}${data[index - 0]}');
       for (int i = 0; i < totalChunks; i++) {
         int start = i * chunkSize;
         int end = (i + 1) * chunkSize;
@@ -176,11 +112,11 @@ class ChatController extends GetxController {
           Message(clientID, 'Image Upload - total Images ${images.length}'));
 
       Future.delayed(const Duration(milliseconds: 333)).then((_) {
-        listScrollController.animateTo(
-          listScrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 333),
-          curve: Curves.easeOut,
-        );
+        // listScrollController.animateTo(
+        //   listScrollController.position.maxScrollExtent,
+        //   duration: const Duration(milliseconds: 333),
+        //   curve: Curves.easeOut,
+        // );
       });
       return true;
     } catch (e) {
@@ -199,18 +135,15 @@ class ChatController extends GetxController {
     connection!.output.add(Uint8List.fromList(utf8.encode("$text\r\n")));
     await connection!.output.allSent;
 
-    // TODO set state
-    // setState(() {
-    messages.add(Message(clientID, pic2.toString()));
-    // });
+    messages.add(Message(clientID, text.toString()));
 
-    Future.delayed(const Duration(milliseconds: 333)).then((_) {
-      listScrollController.animateTo(
-        listScrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 333),
-        curve: Curves.easeOut,
-      );
-    });
+    // Future.delayed(const Duration(milliseconds: 333)).then((_) {
+    //   listScrollController.animateTo(
+    //     listScrollController.position.maxScrollExtent,
+    //     duration: const Duration(milliseconds: 333),
+    //     curve: Curves.easeOut,
+    //   );
+    // });
   }
 
   void onDataReceived(Uint8List data) {
