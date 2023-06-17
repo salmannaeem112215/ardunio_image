@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:image/image.dart' as imagi;
 import 'package:ardunio_image/headers.dart';
 
+enum ImageState { select, selected, croped, uploading, completed }
+
 class ImageController extends GetxController {
   GlobalKey one = GlobalKey();
-
+  final state = ImageState.select.obs;
   final selectedImagePath = ''.obs;
   final selectedImageSize = ''.obs;
   final size = const Size(16, 16).obs;
@@ -16,26 +18,42 @@ class ImageController extends GetxController {
   final compressImageSize = ''.obs;
 
   void getImage(ImageSource imageSource,
-      {int height = 500, int width = 500}) async {
-    final pickedFile = await ImagePicker().pickImage(source: imageSource);
-    // if (pickedFile != null) {
+      {int height = 16, int width = 16}) async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: imageSource,
+    );
+    if (pickedFile == null) {
+      Get.snackbar('Error', 'Please Select Image Again');
+      state.value = ImageState.select;
+      return;
+    }
+
     selectedImagePath.value = '';
     compressImagePath.value = '';
     selectedImagePath.value = pickedFile!.path;
     selectedImageSize.value = _getFileSize(selectedImagePath.value);
+    state.value = ImageState.selected;
 
     // Crop File
+    print('Height $height Width $width');
     final cropImageFile = await ImageCropper().cropImage(
       sourcePath: selectedImagePath.value,
-      maxHeight: 16,
-      maxWidth: 16,
-      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      maxHeight: height,
+      maxWidth: width,
+      aspectRatio:
+          CropAspectRatio(ratioY: height.toDouble(), ratioX: width.toDouble()),
       compressFormat: ImageCompressFormat.jpg,
       // compressQuality: 100,
     );
 
+    if (cropImageFile == null) {
+      Get.snackbar('Error', 'Please Select Image Again');
+      state.value = ImageState.select;
+    }
+
     cropImagePath.value = cropImageFile!.path;
     cropImageSize.value = _getFileSize(cropImagePath.value);
+    // state.value = ImageState.croped;
 
     final dir = Directory.systemTemp;
     final targetPath = '${dir.absolute.path}/temp.jpeg';
@@ -45,9 +63,13 @@ class ImageController extends GetxController {
       targetPath,
       quality: 90,
     );
-
+    if (compressedFile == null) {
+      Get.snackbar('Error', 'Unable To Compress Image, Please Try Again');
+      state.value = ImageState.select;
+    }
     compressImagePath.value = compressedFile!.path;
     compressImageSize.value = _getFileSize(compressImagePath.value);
+    state.value = ImageState.croped;
 
     readImage(File(compressImagePath.value));
 
@@ -59,37 +81,39 @@ class ImageController extends GetxController {
   }
 
   List<String> imgArray = [];
-  void readImage(File img) async {
+  Future<Uint8List> readImage(File img) async {
     imgArray.clear();
     final bytes = await img.readAsBytes();
     final decoder = imagi.JpegDecoder();
     final decodedImg = decoder.decode(bytes);
     final decodedBytes = decodedImg!.getBytes(order: imagi.ChannelOrder.rgb);
+    print('Decoded Bytes Length ${decodedBytes.length}');
+    print('Decoded Bytes $decodedBytes');
+    return decodedBytes;
+    // int loopLimit = decodedImg.width * decodedImg.height;
+    // // int loopLimit = 1000;
+    // for (int i = 0; i < decodedImg.height; i++) {
+    //   for (int j = 0; j < decodedImg.width; j++) {
+    //     int red = decodedBytes[(i * j) * 3];
+    //     int green = decodedBytes[(i * j) * 3 + 1];
+    //     int blue = decodedBytes[(i * j) * 3 + 2];
+    //     imgArray.add(convertToHex([red, green, blue]));
+    //   }
+    // }
 
-    int loopLimit = decodedImg.width * decodedImg.height;
-    // int loopLimit = 1000;
-    for (int i = 0; i < decodedImg.height; i++) {
-      for (int j = 0; j < decodedImg.width; j++) {
-        int red = decodedBytes[(i * j) * 3];
-        int green = decodedBytes[(i * j) * 3 + 1];
-        int blue = decodedBytes[(i * j) * 3 + 2];
-        imgArray.add(convertToHex([red, green, blue]));
-      }
-    }
+    // print('ImageArrayLength : ${imgArray.length}');
+    // print('content : ${imgArray.toString()}');
 
-    print('ImageArrayLength : ${imgArray.length}');
-    print('content : ${imgArray.toString()}');
-
-    String d = '';
-    for (int i = 0; i < decodedImg.height; i++) {
-      for (int j = 0; j < decodedImg.width; j++) {
-        d += '${imgArray[i]}, ';
-      }
-      d += '\n';
-    }
-    for (int i = 0; i < 256; i++) {}
-    FlutterClipboard.copy(d)
-        .then((value) => Get.snackbar('Coppied', 'Valued Coppied '));
+    // String d = '';
+    // for (int i = 0; i < decodedImg.height; i++) {
+    //   for (int j = 0; j < decodedImg.width; j++) {
+    //     d += '${imgArray[i]}, ';
+    //   }
+    //   d += '\n';
+    // }
+    // for (int i = 0; i < 256; i++) {}
+    // FlutterClipboard.copy(d)
+    //     .then((value) => Get.snackbar('Coppied', 'Valued Coppied '));
   }
 
   List<String> convertToHexString(List<List<int>> rgbList) {

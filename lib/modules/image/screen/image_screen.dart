@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:ardunio_image/headers.dart';
 import 'package:ardunio_image/modules/image/view/no_image.dart';
-import 'package:showcaseview/showcaseview.dart';
 
 import '../view/gallary_button.dart';
 
@@ -12,7 +11,9 @@ class ImageScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ImageController ic = Get.put(ImageController());
-
+    final heightR = 16;
+    final widthR = 16;
+    final ratio = heightR / widthR;
     return Scaffold(
         body: SafeArea(
           child: Padding(
@@ -28,11 +29,36 @@ class ImageScreen extends StatelessWidget {
                       width: double.infinity,
                       child: Center(
                         child: Obx(() {
-                          if (ic.selectedImagePath.value.isEmpty) {
+                          final state = ic.state.value;
+                          if (state == ImageState.select ||
+                              ic.selectedImagePath.value.isEmpty) {
                             return const NoImage();
-                          } else {
+                          }
+                          if (state == ImageState.selected) {
                             return Image.file(File(ic.selectedImagePath.value));
                           }
+                          if (state == ImageState.croped) {
+                            print("hi");
+                            return Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.black12,
+                                  border: Border.all(
+                                    color: Colors.black54,
+                                    width: 3,
+                                  )),
+                              height: (context.width - 32) * ratio,
+                              child: Image.file(
+                                File(ic.compressImagePath.value),
+                                fit: BoxFit.contain,
+                              ),
+                            );
+                          }
+                          return const NoImage();
+                          // if (ic.selectedImagePath.value.isEmpty) {
+                          // return const NoImage();
+                          // } else {
+                          // return Image.file(File(ic.selectedImagePath.value));
+                          // }
                         }),
                       ),
                     ),
@@ -44,7 +70,13 @@ class ImageScreen extends StatelessWidget {
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: GallaryButton(
-          onTap: () {},
+          onTap: () {
+            ic.getImage(
+              ImageSource.gallery,
+              height: heightR,
+              width: widthR,
+            );
+          },
         ));
   }
 }
