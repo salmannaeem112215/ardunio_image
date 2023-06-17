@@ -39,24 +39,24 @@ class ImageScreen extends StatelessWidget {
                             print('SHowing Selected Image');
                             return Image.file(File(ic.selectedImagePath.value));
                           }
-                          if (state == ImageState.croped) {
-                            print('Image After Croped');
-                            print("hi   ${ic.selectedImagePath}");
-                            return Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.black12,
-                                  border: Border.all(
-                                    color: Colors.black54,
-                                    width: 3,
-                                  )),
-                              // height: (context.width - 32) * ratio,
-                              child: Image.file(
-                                File(ic.selectedImagePath.value),
-                                // File(ic.cropImagePath.value),
-                                fit: BoxFit.contain,
-                              ),
-                            );
-                          }
+                          // if (state == ImageState.croped) {
+                          //   print('Image After Croped');
+                          //   print("hi   ${ic.selectedImagePath}");
+                          //   return Container(
+                          //     decoration: BoxDecoration(
+                          //         color: Colors.black12,
+                          //         border: Border.all(
+                          //           color: Colors.black54,
+                          //           width: 3,
+                          //         )),
+                          //     // height: (context.width - 32) * ratio,
+                          //     child: Image.file(
+                          //       File(ic.selectedImagePath.value),
+                          //       // File(ic.cropImagePath.value),
+                          //       fit: BoxFit.contain,
+                          //     ),
+                          //   );
+                          // }
                           return const NoImage();
                           // if (ic.selectedImagePath.value.isEmpty) {
                           // return const NoImage();
@@ -74,13 +74,27 @@ class ImageScreen extends StatelessWidget {
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: GallaryButton(
-          onTap: () {
-            // ic.getImage(
-            ic.getGifImage(
-              ImageSource.gallery,
-              height: heightR,
-              width: widthR,
-            );
+          onTap: () async {
+            ic.state.value = ImageState.select;
+            final list = await ic.getImage(ImageSource.gallery);
+            if (list.isEmpty) {
+              ic.state.value = ImageState.select;
+            } else {
+              ic.state.value = ImageState.selected;
+              // print('both are same  ${list[0] == list[1]}');
+              print(' Total Images:  ${list.length}');
+              String val = '[{\n';
+              list.forEach((element) {
+                val += ic.uint8ToString(element);
+                val += '}\n';
+                // print(element.length);
+                // print(element.toString());
+              });
+              val += ']';
+
+              FlutterClipboard.copy(val)
+                  .then((value) => Get.snackbar('Value Copeid', ''));
+            }
           },
         ));
   }

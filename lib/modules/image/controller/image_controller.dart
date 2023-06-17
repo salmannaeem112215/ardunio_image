@@ -2,200 +2,170 @@ import 'dart:io';
 import 'package:image/image.dart' as imagi;
 import 'package:ardunio_image/headers.dart';
 
-enum ImageState { select, selected, croped, uploading, completed }
+enum ImageState { select, selected, processing, uploading, completed }
 
 class ImageController extends GetxController {
   GlobalKey one = GlobalKey();
   final state = ImageState.select.obs;
+  int height = 16;
+  int width = 16;
   final selectedImagePath = ''.obs;
-  final selectedImageSize = ''.obs;
-  final size = const Size(16, 16).obs;
 
-  final cropImagePath = ''.obs;
-  final cropImageSize = ''.obs;
+  Future<List<Uint8List>> getImage(ImageSource imageSource,
+      {int height = 16, int width = 16}) async {
+    selectedImagePath.value = '';
 
-  final compressImagePath = ''.obs;
-  final compressImageSize = ''.obs;
+    final pickedFP = await _pickFile();
 
-  Future<List<Uint8List>> extractGifFrames(File img) async {
+    if (pickedFP == null) {
+      Get.snackbar('Error', 'Select Image Again');
+      return [];
+    }
+    // set selectedImg
+    selectedImagePath.value = pickedFP;
+    state.value = ImageState.selected;
+
+    // get Uint8List
+    List<Uint8List> images = [];
+    if (pickedFP.contains('.gif')) {
+      images = await _convertGif(pickedFP);
+    } else {
+      final img = await _convertJpg(pickedFP);
+      if (img != null) {
+        images = [img];
+      } else {
+        images = [];
+      }
+    }
+    return images;
+  }
+
+  Future<List<Uint8List>> _convertGif(String filePath) async {
     final List<Uint8List> imagess = [];
+
+    final img = File(filePath);
     final bytes = await img.readAsBytes();
     final decoder = imagi.GifDecoder();
     decoder.decode(bytes);
-    print('frames ${decoder.numFrames()}');
+
     for (int i = 0; i < decoder.numFrames(); i++) {
       final decodedImg = decoder.decodeFrame(i);
+      if (decodedImg == null) {
+        Get.snackbar('Error', 'Got 1 image blank in Gif');
+        continue;
+      }
 
-      final dir = Directory.systemTemp;
-      final targetPath = '${dir.absolute.path}/temp${i}.jpg';
-      final ins = imagi.encodeJpg(decodedImg!, quality: 100);
-      final val = await imagi.writeFile(targetPath, ins);
+      final imgPath = await _storeFile(decodedImg, no: i);
+      print(' Image Path $imgPath');
+      if (imgPath == null) {
+        Get.snackbar('Error',
+            'Unable to Create temporary image- Free some storagte and try again');
+        continue;
+      }
+      final imgBytes = await _convertJpg(imgPath, no: i);
 
-      final v = await convertImage(targetPath, height: 16, width: 16);
-      // final v = await readFile(newSourcetargetPath);
+      if (imgBytes == null) {
+        Get.snackbar('Error', 'Unable To convert List');
+        continue;
+      }
 
-      print(v!.length);
-      print(v.toString());
-      state.value = ImageState.select;
-      selectedImagePath.value = targetPath;
-      state.value = ImageState.croped;
-
-      imagess.add(v);
+      imagess.add(imgBytes);
     }
     return imagess;
   }
 
-  void getImage(ImageSource imageSource,
-      {int height = 16, int width = 16}) async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: imageSource,
-    );
-    if (pickedFile == null) {
-      Get.snackbar('Error', 'Please Select Image Again');
-      state.value = ImageState.select;
-      return;
-    }
-
-    selectedImagePath.value = '';
-    compressImagePath.value = '';
-    selectedImagePath.value = pickedFile.path;
-    selectedImageSize.value = _getFileSize(selectedImagePath.value);
-    state.value = ImageState.selected;
-//    Crop File
-    print('Height $height Width $width');
-    final cropImageFile = await ImageCropper().cropImage(
-      sourcePath: selectedImagePath.value,
-      maxHeight: height,
-      maxWidth: width,
-      aspectRatio:
-          CropAspectRatio(ratioY: height.toDouble(), ratioX: width.toDouble()),
-      compressFormat: ImageCompressFormat.jpg,
-      compressQuality: 100,
-    );
-
+  Future<Uint8List?> _convertJpg(String filePath, {int no = 0}) async {
+    // crop file
+    print('To Cropped Image Path $filePath');
+    final cropImageFile = await _cropFile(filePath);
     if (cropImageFile == null) {
       Get.snackbar('Error', 'Please Select Image Again');
-      state.value = ImageState.select;
-      print('HI Error');
-      return;
-    }
-
-    print('No Erro ${cropImageFile!.path}');
-    cropImagePath.value = cropImageFile!.path;
-    cropImageSize.value = _getFileSize(cropImagePath.value);
-    state.value = ImageState.croped;
-
-    final dir = Directory.systemTemp;
-    final targetPath = '${dir.absolute.path}/temp.jpeg';
-
-    final compressedFile = await FlutterImageCompress.compressAndGetFile(
-      cropImagePath.value,
-      targetPath,
-      quality: 90,
-    );
-    if (compressedFile == null) {
-      Get.snackbar('Error', 'Unable To Compress Image, Please Try Again');
-      state.value = ImageState.select;
-    }
-    compressImagePath.value = compressedFile!.path;
-    compressImageSize.value = _getFileSize(compressImagePath.value);
-    state.value = ImageState.croped;
-    print('Here');
-    readImage(File(compressImagePath.value));
-  }
-
-  Future<Uint8List?> convertImage(String imgPath,
-      {int height = 16, int width = 16}) async {
-    selectedImagePath.value = imgPath;
-    selectedImageSize.value = _getFileSize(selectedImagePath.value);
-    state.value = ImageState.selected;
-
-//    Crop File
-    print('Height $height Width $width');
-    final cropImageFile = await ImageCropper().cropImage(
-      sourcePath: selectedImagePath.value,
-      maxHeight: height,
-      maxWidth: width,
-      aspectRatio:
-          CropAspectRatio(ratioY: height.toDouble(), ratioX: width.toDouble()),
-      compressFormat: ImageCompressFormat.jpg,
-      compressQuality: 100,
-    );
-
-    if (cropImageFile == null) {
-      Get.snackbar('Error', 'Please Select Image Again');
-      state.value = ImageState.select;
-      print('HI Error');
       return null;
     }
 
-    print('No Erro ${cropImageFile!.path}');
-    cropImagePath.value = cropImageFile!.path;
-    cropImageSize.value = _getFileSize(cropImagePath.value);
-    state.value = ImageState.croped;
-
-    final dir = Directory.systemTemp;
-    final targetPath = '${dir.absolute.path}/temp.jpeg';
-
-    final compressedFile = await FlutterImageCompress.compressAndGetFile(
-      cropImagePath.value,
-      targetPath,
-      quality: 90,
-    );
+    //compress file
+    final compressedFile = await _compressFile(cropImageFile.path, 'temp-$no');
     if (compressedFile == null) {
       Get.snackbar('Error', 'Unable To Compress Image, Please Try Again');
       state.value = ImageState.select;
+      return null;
     }
-    compressImagePath.value = compressedFile!.path;
-    compressImageSize.value = _getFileSize(compressImagePath.value);
-    // selectedI
-    state.value = ImageState.croped;
-    return await readImage(File(compressImagePath.value));
+
+    print('To Compressed Image Path ${compressedFile.path}');
+    return await _imageToUint8List(File(compressedFile.path));
   }
 
-  List<String> imgArray = [];
-  Future<Uint8List> readImage(File img) async {
-    imgArray.clear();
+  Future<Uint8List> _imageToUint8List(File img) async {
     final bytes = await img.readAsBytes();
     final decoder = imagi.JpegDecoder();
     final decodedImg = decoder.decode(bytes);
     final decodedBytes = decodedImg!.getBytes(order: imagi.ChannelOrder.rgb);
-    print('Decoded Bytes Length ${decodedBytes.length}');
-    print('Decoded Bytes $decodedBytes');
-    print('${decodedImg!.height} x ${decodedImg!.width}');
-
     return decodedBytes;
   }
 
-  void getGifImage(ImageSource imageSource,
-      {int height = 16, int width = 16}) async {
+  Future<String?> _pickFile() async {
     final pickedFile = await ImagePicker().pickImage(
-      source: imageSource,
+      source: ImageSource.gallery,
     );
     if (pickedFile == null) {
       Get.snackbar('Error', 'Please Select Image Again');
-      state.value = ImageState.select;
-      return;
+      return null;
     }
-
-    selectedImagePath.value = '';
-    compressImagePath.value = '';
-    ImageState.select;
-    selectedImagePath.value = pickedFile.path;
-    selectedImageSize.value = _getFileSize(selectedImagePath.value);
-    state.value = ImageState.selected;
-    state.value = ImageState.croped;
-
-    final s = await extractGifFrames(
-      File(selectedImagePath.value),
-    );
-    print(s.length);
+    return pickedFile.path;
   }
 
-  String _getFileSize(String path) {
-    return '${(File(path).lengthSync() / 1024 / 1024).toStringAsFixed(2)} MB';
+  Future<CroppedFile?> _cropFile(String filePath) async {
+    return await ImageCropper().cropImage(
+      sourcePath: filePath,
+      maxHeight: height,
+      maxWidth: width,
+      aspectRatio:
+          CropAspectRatio(ratioY: height.toDouble(), ratioX: width.toDouble()),
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 100,
+    );
+  }
+
+  Future<XFile?> _compressFile(String source, String fileName) async {
+    final dir = Directory.systemTemp;
+    final targetPath = '${dir.absolute.path}/temp_$fileName.jpeg';
+
+    return await FlutterImageCompress.compressAndGetFile(
+      source,
+      targetPath,
+      quality: 90,
+    );
+  }
+
+  Future<String?> _storeFile(imagi.Image img, {int no = 0}) async {
+    final dir = Directory.systemTemp;
+    final targetPath = '${dir.absolute.path}/store_temp-$no.jpg';
+    final ins = imagi.encodeJpg(img, quality: 100);
+    final val = await imagi.writeFile(targetPath, ins);
+    return val == false ? null : targetPath;
+  }
+
+  String uint8ToString(Uint8List img) {
+    String val = '';
+    for (int i = 0; i < img.length; i += 3) {
+      val +=
+          '0x${intToHex(img[i])}${intToHex(img[i + 1])}${intToHex(img[i + 2])}, ';
+      if (i % 16 == 0 && i != 0) {
+        val += '\n';
+      }
+    }
+    return val;
+  }
+
+  String intToHex(int n) {
+    if (n < 0 || n > 255) {
+      throw ArgumentError("Integer value must be between 0 and 255.");
+    }
+    String hexString = n.toRadixString(16).toUpperCase();
+    return hexString.padLeft(2, '0');
   }
 }
+
 
 
 
@@ -216,5 +186,3 @@ class ImageController extends GetxController {
 // 0xfffdf1,0xfff8ec,0xfdfbfe,0xfffeff,0xfbf9fa,0xfbf9fa,0x000b04,0x000500,0x000500,0x000b04,0xfbf9fa,0xfbf9fa,0xfffeff,0xfdfbfe,0xfff8ec,0xfffdf1,
 // 0xf8fefa,0xf9fffb,0xfffffd,0xfffffd,0xfefeff,0xfefeff,0xfff7f5,0xfffcfa,0xfffcfa,0xfff7f5,0xfefeff,0xfefeff,0xfffffd,0xfffffd,0xf9fffb,0xf8fefa,
 // 0xfafffc,0xf7fdf9,0xfffffd,0xfdfcfa,0xfcfcff,0xf8f8ff,0xfffcfa,0xfff7f5,0xfff7f5,0xfffcfa,0xf8f8ff,0xfcfcff,0xfdfcfa,0xfffffd,0xf7fdf9,0xfafffc
-
-
