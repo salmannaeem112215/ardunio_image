@@ -32,13 +32,16 @@ class ImageScreen extends StatelessWidget {
                           final state = ic.state.value;
                           if (state == ImageState.select ||
                               ic.selectedImagePath.value.isEmpty) {
+                            print('No Image');
                             return const NoImage();
                           }
                           if (state == ImageState.selected) {
+                            print('SHowing Selected Image');
                             return Image.file(File(ic.selectedImagePath.value));
                           }
                           if (state == ImageState.croped) {
-                            print("hi");
+                            print('Image After Croped');
+                            print("hi   ${ic.selectedImagePath}");
                             return Container(
                               decoration: BoxDecoration(
                                   color: Colors.black12,
@@ -46,9 +49,10 @@ class ImageScreen extends StatelessWidget {
                                     color: Colors.black54,
                                     width: 3,
                                   )),
-                              height: (context.width - 32) * ratio,
+                              // height: (context.width - 32) * ratio,
                               child: Image.file(
-                                File(ic.compressImagePath.value),
+                                File(ic.selectedImagePath.value),
+                                // File(ic.cropImagePath.value),
                                 fit: BoxFit.contain,
                               ),
                             );
@@ -71,7 +75,8 @@ class ImageScreen extends StatelessWidget {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: GallaryButton(
           onTap: () {
-            ic.getImage(
+            // ic.getImage(
+            ic.getGifImage(
               ImageSource.gallery,
               height: heightR,
               width: widthR,
