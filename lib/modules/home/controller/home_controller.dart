@@ -7,6 +7,8 @@ class HomeController extends GetxController {
 
   Rx<BluetoothState> bluetoothState = BluetoothState.UNKNOWN.obs;
   BluetoothDevice? conBDevice;
+  int height = 0;
+  int width = 0;
 
   @override
   void onInit() {

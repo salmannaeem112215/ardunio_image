@@ -15,5 +15,9 @@ class HomeBinding extends Bindings {
       ChatController(),
       permanent: true,
     );
+    Get.put<ImageController>(
+      ImageController(),
+      permanent: true,
+    );
   }
 }
