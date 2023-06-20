@@ -67,16 +67,19 @@ void turnLightOff(int led)
     Serial.println("LED is OFF");
 }
 const int PAYLOAD = 60;
+
 void imageUpload()
 {
+    int count = 0;
     byte receivedData[PAYLOAD];
     int len = 0; 
     Serial.print("Stated"); 
     while (true)
     {
-        delay(200);
+        delay(500);
         len = Serial.available();
         if(len>0){
+          count++;
           if(len>=60){
             Serial.readBytes(receivedData, 60);
             for(int i=0;i<60;i+=3){
@@ -105,105 +108,28 @@ void imageUpload()
                 receivedData[i+1]=0;
                 receivedData[i+2]=0;
                 Serial.print(" ");
-                if(i+3+1==len && receivedData[i+3]=='\n'){
+                if(i+3+2==len && receivedData[i+2]=='\n'){
                   
                   Serial.println("That's All");
                   receivedData[i+3]=0;
                   break;
                 }
               }
+              Serial.println("");
              }
              else{
-               if(receivedData[0]=='\n'){
+               if(receivedData[1]=='\n'){
                  Serial.println("");
-                 Serial.print("\n found break");
+                 Serial.println("\n found break");
+                 Serial.println(count);
                }
              }
 
             }
-            
-          }
+        }}  
+          
 
-
-        // len = Serial.available();
-        // if (len > 0)
-        // {
-        //   char command = Serial.read();
-        //   Serial.println(command);
-        //     if (len >= 63)
-        //     {
-        //         Serial.println("chunk");
-        //     }
-            
-
-        //     else
-        //     {
-        //         Serial.println("end-chunk");
-        //         // break;
-        //     }
-        // }
-        // delay(1000);
-        //         turnLightOff(led3);
-
-    }
-    //  turnLightOff(led2);
     Serial.print("ENDED ");       
 
 }
 
-
-
-
-// Determine the number of available bytes
-        // int availableBytes = Serial.available();
-
-        // // Create an array to store the received data
-        // byte receivedData[availableBytes];
-
-        // // Read all available bytes into the array
-        // Serial.readBytes(receivedData, availableBytes);
-
-        // Serial.println(avaliableBytes);
-        // byte r = 0;
-        // byte g = 0;
-        // byte b = 0;
-        // int index=0;
-        // imago = Serial.read();
-        // delay(10);
-
-        // height = Serial.read();
-        // delay(10);
-        // width = Serial.read();
-        // delay(10);
-
-        // for (int i = 0; i < imago; i++) {
-        //   for (int j = 0; j < height; j++) {
-        //     for (int k = 0; k < width; k++) {
-        //       int index = (i * height * width * 3) + (j * width * 3) + (k * 3);
-        //       dataa[index] = Serial.read();
-        //       dataa[index+1] = Serial.read();
-        //       dataa[index+2] = Serial.read();
-        //     }
-        //   }
-        // }
-
-        // for (int i = 0; i < imago; i++) {
-        //   Serial.print('Image :');
-        //   delay(10);
-        //   Serial.println(i+1);
-        //   delay(10);
-
-        //   for (int j = 0; j < height; j++) {
-        //     for (int k = 0; k < width; k++) {
-        //       int index = (i * height * width * 3) + (j * width * 3) + (k * 3);
-        //       Serial.print(dataa[index]);
-        //       delay(10);
-        //       Serial.print(dataa[index+1]);
-        //       delay(10);
-        //       Serial.print(dataa[index+2]);
-        //       delay(10);
-        //       Serial.print("  ");
-        //     }
-        //       Serial.println("");
-        //   }
-        // }
