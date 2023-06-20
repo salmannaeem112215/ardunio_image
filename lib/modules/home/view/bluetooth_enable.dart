@@ -25,7 +25,6 @@ class BluetoothEnable extends StatelessWidget {
               Get.snackbar('Scanning Cancel', 'Qr Scanning Mode Cancel');
               hc.conBDevice = null;
             } else {
-              print(' QR Data is ${qrData.toJson().toString()}');
               //get Bluetooth Devices and connect it
               final devices = await hc.scanDevice();
               BluetoothDevice? deviceToConnect;
@@ -43,8 +42,6 @@ class BluetoothEnable extends StatelessWidget {
               } else {
                 final ic = Get.find<ImageController>();
 
-                print(
-                    'Debug Values we got is ${qrData.height}  Width ${qrData.width}');
                 ic.height = qrData.height;
                 ic.width = qrData.width;
                 hc.conBDevice = deviceToConnect;

@@ -5,11 +5,20 @@ import 'package:permission_handler/permission_handler.dart';
 
 class HomeController extends GetxController {
   final instance = FlutterBluetoothSerial.instance;
-  bool bluetoothAllowed = false;
   Rx<BluetoothState> bluetoothState = BluetoothState.UNKNOWN.obs;
   BluetoothDevice? conBDevice;
   int height = 0;
   int width = 0;
+  bool get isBluetoothAllowed {
+    if (bAdvertise == false || bScan == false || bConnect == false) {
+      return false;
+    }
+    return true;
+  }
+
+  bool bAdvertise = false;
+  bool bScan = false;
+  bool bConnect = false;
 
   @override
   void onInit() {
@@ -41,24 +50,17 @@ class HomeController extends GetxController {
   // this module will tell to on the phone bluetooth
   void enableBluetooth() async {
     try {
-      print('HIII');
-      print('Bluetooth State is ${bb.BluetoothBondState} ');
-      if (await askPermission() != true) {
-        print('Permission not granted');
+      if (await askPermissions() != true) {
         Get.snackbar('Error', 'Please Enable Permission');
         return;
       }
-      print('Permission granted');
-
-      print('HIII');
-
       if (bluetoothState.value.isEnabled) {
         await instance.requestDisable();
       } else {
         await instance.requestEnable();
       }
     } catch (e) {
-      print(e);
+      Get.snackbar('Error', e.toString());
     }
   }
 
@@ -67,7 +69,7 @@ class HomeController extends GetxController {
   }
 
   Future<List<BluetoothDevice>> scanDevice() async {
-    if (await askPermission() != true) {
+    if (await askPermissions() != true) {
       Get.snackbar('Error', 'Please Enable Permission');
       return [];
     }
@@ -76,29 +78,34 @@ class HomeController extends GetxController {
   }
 
   checkBluetoothPermission() async {
-    final status = await Permission.bluetoothConnect.status;
-    if (status == PermissionStatus.granted) {
-      bluetoothAllowed = true;
-    } else {
-      await askPermission();
-    }
+    final statusA = await Permission.bluetoothAdvertise.status;
+    final statusC = await Permission.bluetoothConnect.status;
+    final statusS = await Permission.bluetoothScan.status;
+
+    bAdvertise = statusA == PermissionStatus.granted;
+    bConnect = statusC == PermissionStatus.granted;
+    bScan = statusS == PermissionStatus.granted;
+
+    isBluetoothAllowed ? null : askPermissions();
   }
 
-  Future<bool> askPermission() async {
-    if (bluetoothAllowed == true) {
+  Future<bool> askPermissions() async {
+    if (isBluetoothAllowed == true) {
       return true;
     }
-    final res = await Permission.bluetoothConnect.request();
-    if (res == PermissionStatus.granted) {
-      bluetoothAllowed = true;
-      return true;
-    } else {
-      bluetoothAllowed = false;
-      return false;
+
+    if (bAdvertise != true) {
+      final res = await Permission.bluetoothAdvertise.request();
+      res.isGranted ? bAdvertise = true : bAdvertise = false;
     }
+    if (bConnect != true) {
+      final res = await Permission.bluetoothConnect.request();
+      res.isGranted ? bConnect = true : bConnect = false;
+    }
+    if (bScan != true) {
+      final res = await Permission.bluetoothScan.request();
+      res.isGranted ? bScan = true : bScan = false;
+    }
+    return isBluetoothAllowed;
   }
-  // Future<void> connectToDevice(String deviceAddress) async {
-  //   await _communication.connectBl(deviceAddress);
-  //   _communication.sendMessage("Hello");
-  // }
 }

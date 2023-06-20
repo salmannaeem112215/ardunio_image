@@ -51,17 +51,11 @@ class ChatController extends GetxController {
     }
 
     cc.connectedDevice = hc.conBDevice;
-    print('Connect Device');
 
     BluetoothConnection.toAddress(hc.conBDevice!.address).then((con) {
-      print('HI COnnection');
-
       cc.connection = con;
-
-      // setState(() {
       cc.isConnecting.value = false;
       cc.isDisconnecting.value = false;
-      // });
       doUpdate();
 
       cc.connection!.input!.listen(cc.onDataReceived).onDone(() {
@@ -108,6 +102,12 @@ class ChatController extends GetxController {
     try {
       int chunkSize = 60;
       int totalChunks = (data.length / chunkSize).ceil();
+      Get.snackbar(
+        'Time ',
+        'Please Wait ${(totalChunks * 0.5).toStringAsFixed(2)} secs to upload Image/Gif to Ardunio ',
+        duration: const Duration(seconds: 5),
+        snackPosition: SnackPosition.BOTTOM,
+      );
       for (int i = 0; i < totalChunks; i++) {
         int start = i * chunkSize;
         int end = (i + 1) * chunkSize;
@@ -117,7 +117,9 @@ class ChatController extends GetxController {
         connection!.output.add(Uint8List.fromList(chunk));
         await connection!.output.allSent;
         await Future.delayed(const Duration(milliseconds: 500));
-        print('Chunk $start - $end');
+        if (kDebugMode) {
+          print('Chunk $start - $end');
+        }
       }
 
       messages.add(

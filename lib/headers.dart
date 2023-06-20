@@ -14,6 +14,7 @@ export 'package:image_cropper/image_cropper.dart';
 export 'package:image_picker/image_picker.dart';
 export 'package:flutter_image_compress/flutter_image_compress.dart';
 export 'package:clipboard/clipboard.dart';
+export 'package:permission_handler/permission_handler.dart';
 
 export './routes/app_pages.dart';
 export './constants/icons_path.dart';

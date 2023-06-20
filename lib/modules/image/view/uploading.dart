@@ -19,6 +19,5 @@ class Uploading extends StatelessWidget {
         ),
       ],
     );
-    ;
   }
 }

@@ -120,7 +120,6 @@ class ImageController extends GetxController {
   }
 
   Future<CroppedFile?> _cropFile(String filePath) async {
-    print('to Crop Heigh $height, Width $width');
     return await ImageCropper().cropImage(
       sourcePath: filePath,
       maxHeight: height,
