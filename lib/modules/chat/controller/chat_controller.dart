@@ -26,6 +26,13 @@ class ChatController extends GetxController {
     super.onClose();
   }
 
+  void resetValues() {
+    messages.clear();
+    _messageBuffer = '';
+    textEditingController.text = '';
+    isTyping.value = false;
+  }
+
   void disconnect() {
     if (isConnected) {
       isDisconnecting.value = true;
@@ -37,13 +44,18 @@ class ChatController extends GetxController {
   void connectDevice() {
     final hc = Get.find<HomeController>();
     final cc = Get.find<ChatController>();
+    resetValues();
     if (hc.conBDevice == null) {
       Get.snackbar('Error', 'Try Again');
       Get.back();
     }
 
     cc.connectedDevice = hc.conBDevice;
+    print('Connect Device');
+
     BluetoothConnection.toAddress(hc.conBDevice!.address).then((con) {
+      print('HI COnnection');
+
       cc.connection = con;
 
       // setState(() {

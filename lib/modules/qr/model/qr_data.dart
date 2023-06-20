@@ -23,7 +23,7 @@ class QrData {
 
   factory QrData.fromJson(String jsonString) {
     final Map<String, dynamic> json = jsonDecode(jsonString);
-
+    print('Debug to Crop Height ${json[height_]} Width  ${json[width_]}');
     return QrData(
       name: json[name_] == null ? 'IN_VALID' : json[name_]!,
       address: json[address_] == null ? 'IN_VALID' : json[address_]!,
@@ -35,8 +35,8 @@ class QrData {
               : int.tryParse(json[width_]!) ?? 0,
       height: json[height_] == null
           ? 0
-          : json[width_].runtimeType == int
-              ? json[width_]!
+          : json[height_].runtimeType == int
+              ? json[height_]!
               : int.tryParse(json[height_]!) ?? 0,
     );
   }
