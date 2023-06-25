@@ -1,7 +1,5 @@
 import 'package:ardunio_image/headers.dart';
 
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as bb;
-import 'package:permission_handler/permission_handler.dart';
 
 class HomeController extends GetxController {
   final instance = FlutterBluetoothSerial.instance;

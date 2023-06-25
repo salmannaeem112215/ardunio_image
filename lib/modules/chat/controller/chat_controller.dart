@@ -86,17 +86,22 @@ class ChatController extends GetxController {
 
   Future<bool> uploadImage(List<Uint8List> images) async {
     List<int> data = [];
+    // data.add(images.length);
     for (var element in images) {
       data.addAll(element);
     }
 
     // at the end of list sending no of images  and end message
-    data.add(images.length);
-    data.add(10);
 
     // Start Uploading
+
     sendCustomMessage("U");
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future.delayed(const Duration(milliseconds: 1000));
+    print('Images length is ${images.length}');
+    final tlist = Uint8List.fromList([images.length]);
+    print('Sending Data is $tlist');
+    connection!.output.add(tlist);
+    await Future.delayed(const Duration(milliseconds: 1000));
 
     // Send Data In Chunks
     try {
@@ -114,9 +119,11 @@ class ChatController extends GetxController {
         end = end > data.length ? data.length : end;
 
         List<int> chunk = data.sublist(start, end);
+        print(chunk.length);
+        print(chunk.toString());
         connection!.output.add(Uint8List.fromList(chunk));
         await connection!.output.allSent;
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 1000));
         if (kDebugMode) {
           print('Chunk $start - $end');
         }
@@ -146,6 +153,7 @@ class ChatController extends GetxController {
 
   void sendCustomMessage(String text) async {
     textEditingController.clear();
+    isTyping.value = false;
     connection!.output.add(Uint8List.fromList(utf8.encode("$text\r\n")));
     await connection!.output.allSent;
 
