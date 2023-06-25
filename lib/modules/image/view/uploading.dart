@@ -17,6 +17,16 @@ class Uploading extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
+        Obx(
+          () => Text(
+            'Time Left - ${Get.find<ChatController>().timeToW8.value} secs',
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ],
     );
   }

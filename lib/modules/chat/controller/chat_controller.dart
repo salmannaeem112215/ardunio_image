@@ -8,6 +8,7 @@ class ChatController extends GetxController {
   bool get isConnected => connection != null && connection!.isConnected;
   RxBool updateValue = false.obs;
   RxBool isDisconnecting = false.obs;
+  RxInt timeToW8 = 0.obs;
 
   final messages = <Message>[].obs;
   String _messageBuffer = '';
@@ -85,31 +86,30 @@ class ChatController extends GetxController {
   }
 
   Future<bool> uploadImage(List<Uint8List> images) async {
+    const int seconds = 2;
     List<int> data = [];
-    // data.add(images.length);
+
     for (var element in images) {
       data.addAll(element);
     }
 
-    // at the end of list sending no of images  and end message
-
-    // Start Uploading
-
     sendCustomMessage("U");
-    await Future.delayed(const Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(seconds: 1));
     print('Images length is ${images.length}');
     final tlist = Uint8List.fromList([images.length]);
     print('Sending Data is $tlist');
     connection!.output.add(tlist);
-    await Future.delayed(const Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(seconds: seconds));
 
     // Send Data In Chunks
     try {
       int chunkSize = 60;
       int totalChunks = (data.length / chunkSize).ceil();
+      timeToW8.value = (totalChunks * seconds + seconds * 4);
+
       Get.snackbar(
         'Time ',
-        'Please Wait ${(totalChunks * 0.5).toStringAsFixed(2)} secs to upload Image/Gif to Ardunio ',
+        'Please Wait $timeToW8 secs to upload ${images.length == 1 ? 'Image' : 'Gif'} to Ardunio ',
         duration: const Duration(seconds: 5),
         snackPosition: SnackPosition.BOTTOM,
       );
@@ -123,7 +123,8 @@ class ChatController extends GetxController {
         print(chunk.toString());
         connection!.output.add(Uint8List.fromList(chunk));
         await connection!.output.allSent;
-        await Future.delayed(const Duration(milliseconds: 1000));
+        await Future.delayed(const Duration(milliseconds: 2000));
+        timeToW8.value -= 2;
         if (kDebugMode) {
           print('Chunk $start - $end');
         }
@@ -131,7 +132,7 @@ class ChatController extends GetxController {
 
       messages.add(
           Message(clientID, 'Image Upload - total Images ${images.length}'));
-
+      timeToW8.value = 0;
       Future.delayed(const Duration(milliseconds: 333)).then((_) {
         // listScrollController.animateTo(
         //   listScrollController.position.maxScrollExtent,
