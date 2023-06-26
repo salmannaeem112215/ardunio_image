@@ -6,14 +6,13 @@ class MessageList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cc = Get.find<ChatController>();
-    return Obx(
-      () => ListView.builder(
-        itemBuilder: (context, index) =>
-            MessageTile(message: cc.messages[index]),
-        itemCount: cc.messages.length,
-        padding: const EdgeInsets.all(12.0),
-        controller: cc.listScrollController,
-      ),
-    );
+
+    return Obx(() => ListView.builder(
+          itemBuilder: (context, index) =>
+              MessageTile(message: cc.messages[index]),
+          itemCount: cc.messages.length,
+          padding: const EdgeInsets.all(12.0),
+          controller: cc.listScrollController,
+        ));
   }
 }

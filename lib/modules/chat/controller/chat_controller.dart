@@ -8,6 +8,8 @@ class ChatController extends GetxController {
   bool get isConnected => connection != null && connection!.isConnected;
   RxBool updateValue = false.obs;
   RxBool isDisconnecting = false.obs;
+  String latestMessage = '';
+  bool latestMessageRecive = false;
   RxInt timeToW8 = 0.obs;
 
   final messages = <Message>[].obs;
@@ -19,6 +21,22 @@ class ChatController extends GetxController {
 
   doUpdate() {
     updateValue.value = !updateValue.value;
+  }
+
+  messageRecive(String message) {
+    latestMessage = message;
+    latestMessageRecive = !latestMessageRecive;
+  }
+
+  Future<String> waitTillMessageRecive() async {
+    int delay = 100;
+    bool prevState = latestMessageRecive;
+    while (prevState == latestMessageRecive && delay > 0) {
+      print('12');
+      await Future.delayed(const Duration(milliseconds: 50));
+      delay--;
+    }
+    return delay == 0 ? 'timeout' : latestMessage;
   }
 
   @override
@@ -86,7 +104,8 @@ class ChatController extends GetxController {
   }
 
   Future<bool> uploadImage(List<Uint8List> images) async {
-    const int seconds = 2;
+    const int seconds = 1500;
+    String resp = '';
     List<int> data = [];
 
     for (var element in images) {
@@ -94,12 +113,31 @@ class ChatController extends GetxController {
     }
 
     sendCustomMessage("U");
-    await Future.delayed(const Duration(seconds: 1));
-    print('Images length is ${images.length}');
-    final tlist = Uint8List.fromList([images.length]);
-    print('Sending Data is $tlist');
-    connection!.output.add(tlist);
-    await Future.delayed(const Duration(seconds: seconds));
+
+    // w8 till images ardunio send Images
+    resp = await waitTillMessageRecive();
+    if (resp != 'Images') return false;
+
+    // send length
+    Uint8List cmd = Uint8List.fromList([images.length]);
+    connection!.output.add(cmd);
+    await connection!.output.allSent;
+    // w8 till same legth is return
+    resp = await waitTillMessageRecive();
+    print('resp length $resp');
+    if (resp != images.length.toString()) return false;
+
+    // semd 100
+    cmd = Uint8List.fromList([100]);
+    connection!.output.add(cmd);
+    await connection!.output.allSent;
+    // w8 till OK is return
+    resp = await waitTillMessageRecive();
+    print('resp of ok is $resp');
+    if (resp != "OK") return false;
+
+    print('Start Sending Images');
+    await Future.delayed(const Duration(milliseconds: 200));
 
     // Send Data In Chunks
     try {
@@ -117,18 +155,32 @@ class ChatController extends GetxController {
         int start = i * chunkSize;
         int end = (i + 1) * chunkSize;
         end = end > data.length ? data.length : end;
-
         List<int> chunk = data.sublist(start, end);
-        print(chunk.length);
-        print(chunk.toString());
         connection!.output.add(Uint8List.fromList(chunk));
         await connection!.output.allSent;
-        await Future.delayed(const Duration(milliseconds: 2000));
         timeToW8.value -= 2;
         if (kDebugMode) {
           print('Chunk $start - $end');
         }
+        print('Srtart W8 ');
+        final res = await waitTillMessageRecive();
+        print('After W8 Resp is $res ');
+
+        if (res != chunk.length.toString()) {
+          print('Data Loss Error');
+          // Error Message
+
+          final cmd1 = Uint8List.fromList([69]);
+          connection!.output.add(cmd1);
+          await connection!.output.allSent;
+          break;
+        }
+        // await Future.delayed(const Duration(milliseconds: 200));
       }
+      // Finish Messaghe
+      final cmd1 = Uint8List.fromList([70]);
+      connection!.output.add(cmd1);
+      await connection!.output.allSent;
 
       messages.add(
           Message(clientID, 'Image Upload - total Images ${images.length}'));
@@ -196,13 +248,18 @@ class ChatController extends GetxController {
     String dataString = String.fromCharCodes(buffer);
     int index = buffer.indexOf(13);
     if (~index != 0) {
+      String recivedMessage = backspacesCounter > 0
+          ? _messageBuffer.substring(
+              0, _messageBuffer.length - backspacesCounter)
+          : _messageBuffer + dataString.substring(0, index);
+      recivedMessage = recivedMessage.trim();
+      print('Value we recive from ardunio is $recivedMessage');
+      messageRecive(recivedMessage);
+
       messages.add(
         Message(
           1,
-          backspacesCounter > 0
-              ? _messageBuffer.substring(
-                  0, _messageBuffer.length - backspacesCounter)
-              : _messageBuffer + dataString.substring(0, index),
+          recivedMessage,
         ),
       );
       _messageBuffer = dataString.substring(index);
