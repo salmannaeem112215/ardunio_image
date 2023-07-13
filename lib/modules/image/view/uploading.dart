@@ -5,6 +5,7 @@ class Uploading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cc = Get.find<ChatController>();
     return Column(
       children: [
         Image.asset(IconPath.uploading),
@@ -17,17 +18,23 @@ class Uploading extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        Obx(
-          () => Text(
-            'Time Left - ${Get.find<ChatController>().timeToW8.value} secs',
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
+        Obx(() {
+          int time = cc.timeToW8.value;
+          String msg = time < 0 ? 'Calculating Time' : 'Time Left : $time secs';
+          return Text(
+            msg,
+            style: textStyle(),
+          );
+        }),
       ],
+    );
+  }
+
+  TextStyle textStyle() {
+    return const TextStyle(
+      color: Colors.grey,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
     );
   }
 }

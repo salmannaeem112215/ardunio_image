@@ -104,53 +104,38 @@ class ChatController extends GetxController {
   }
 
   Future<bool> uploadImage(List<Uint8List> images) async {
-    const int seconds = 1500;
     String resp = '';
     List<int> data = [];
-
+    timeToW8.value = -1;
     for (var element in images) {
       data.addAll(element);
     }
+    sendCustomMessage("A");
+    await Future.delayed(const Duration(seconds: 1));
 
-    sendCustomMessage("U");
-
-    // w8 till images ardunio send Images
+    // send and recive Message
+    String msg = "ready";
+    String arResp = "yes";
+    sendCustomMessage(msg);
     resp = await waitTillMessageRecive();
-    if (resp != 'Images') return false;
+    if (resp != arResp) return false;
 
-    // send length
-    Uint8List cmd = Uint8List.fromList([images.length]);
-    connection!.output.add(cmd);
-    await connection!.output.allSent;
-    // w8 till same legth is return
+    // send and recive Message Length
+    final char = String.fromCharCode(images.length);
+    msg = "$char?";
+    arResp = images.length.toString();
+    await Future.delayed(const Duration(seconds: 1));
+    sendCustomMessage(msg);
     resp = await waitTillMessageRecive();
-    print('resp length $resp');
-    if (resp != images.length.toString()) return false;
+    if (resp != arResp) return false;
 
-    // semd 100
-    cmd = Uint8List.fromList([100]);
-    connection!.output.add(cmd);
-    await connection!.output.allSent;
-    // w8 till OK is return
-    resp = await waitTillMessageRecive();
-    print('resp of ok is $resp');
-    if (resp != "OK") return false;
-
-    print('Start Sending Images');
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future.delayed(const Duration(seconds: 1));
 
     // Send Data In Chunks
     try {
       int chunkSize = 60;
       int totalChunks = (data.length / chunkSize).ceil();
-      timeToW8.value = (totalChunks * seconds + seconds * 4);
-
-      Get.snackbar(
-        'Time ',
-        'Please Wait $timeToW8 secs to upload ${images.length == 1 ? 'Image' : 'Gif'} to Ardunio ',
-        duration: const Duration(seconds: 5),
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      timeToW8.value = (totalChunks + 1).toInt();
       for (int i = 0; i < totalChunks; i++) {
         int start = i * chunkSize;
         int end = (i + 1) * chunkSize;
@@ -158,40 +143,22 @@ class ChatController extends GetxController {
         List<int> chunk = data.sublist(start, end);
         connection!.output.add(Uint8List.fromList(chunk));
         await connection!.output.allSent;
-        timeToW8.value -= 2;
-        if (kDebugMode) {
-          print('Chunk $start - $end');
-        }
-        print('Srtart W8 ');
+        timeToW8.value -= 1;
+        print('chunk no $i ${chunk.length}');
         final res = await waitTillMessageRecive();
-        print('After W8 Resp is $res ');
 
         if (res != chunk.length.toString()) {
-          print('Data Loss Error');
-          // Error Message
-
-          final cmd1 = Uint8List.fromList([69]);
-          connection!.output.add(cmd1);
-          await connection!.output.allSent;
+          Get.snackbar(
+            'Error',
+            'Upload Again - Data Missed',
+            dismissDirection: DismissDirection.down,
+          );
+          sendCustomMessage("?");
           break;
         }
         // await Future.delayed(const Duration(milliseconds: 200));
       }
-      // Finish Messaghe
-      final cmd1 = Uint8List.fromList([70]);
-      connection!.output.add(cmd1);
-      await connection!.output.allSent;
-
-      messages.add(
-          Message(clientID, 'Image Upload - total Images ${images.length}'));
-      timeToW8.value = 0;
-      Future.delayed(const Duration(milliseconds: 333)).then((_) {
-        // listScrollController.animateTo(
-        //   listScrollController.position.maxScrollExtent,
-        //   duration: const Duration(milliseconds: 333),
-        //   curve: Curves.easeOut,
-        // );
-      });
+      sendCustomMessage("?");
       return true;
     } catch (e) {
       // Ignore error, but notify state
@@ -207,7 +174,7 @@ class ChatController extends GetxController {
   void sendCustomMessage(String text) async {
     textEditingController.clear();
     isTyping.value = false;
-    connection!.output.add(Uint8List.fromList(utf8.encode("$text\r\n")));
+    connection!.output.add(Uint8List.fromList(utf8.encode("$text\n")));
     await connection!.output.allSent;
 
     messages.add(Message(clientID, text.toString()));
