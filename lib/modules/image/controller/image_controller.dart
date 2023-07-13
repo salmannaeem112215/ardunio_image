@@ -50,7 +50,6 @@ class ImageController extends GetxController {
 
   Future<List<Uint8List>> _convertGif(String filePath) async {
     final List<Uint8List> imagess = [];
-
     final img = File(filePath);
     final bytes = await img.readAsBytes();
     final decoder = imagi.GifDecoder();
@@ -72,7 +71,6 @@ class ImageController extends GetxController {
       final imgBytes = await _convertJpg(imgPath, no: i);
 
       if (imgBytes == null) {
-        Get.snackbar('Error', 'Unable To convert List');
         continue;
       }
 
@@ -85,7 +83,7 @@ class ImageController extends GetxController {
     // crop file
     final cropImageFile = await _cropFile(filePath);
     if (cropImageFile == null) {
-      Get.snackbar('Error', 'Please Select Image Again');
+      Get.snackbar('Reminder', 'You Skip Image');
       return null;
     }
 
@@ -96,7 +94,7 @@ class ImageController extends GetxController {
       state.value = ImageState.select;
       return null;
     }
-    selectedImagePath.value = cropImageFile.path;
+    selectedImagePath.value = compressedFile.path;
     return await _imageToUint8List(File(compressedFile.path));
   }
 
@@ -144,7 +142,7 @@ class ImageController extends GetxController {
 
   Future<String?> _storeFile(imagi.Image img, {int no = 0}) async {
     final dir = Directory.systemTemp;
-    final targetPath = '${dir.absolute.path}/store_temp-$no.jpg';
+    final targetPath = '${dir.absolute.path}/store_temp-$no.jpeg';
     final ins = imagi.encodeJpg(img, quality: 100);
     final val = await imagi.writeFile(targetPath, ins);
     return val == false ? null : targetPath;
