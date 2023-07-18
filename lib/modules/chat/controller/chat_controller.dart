@@ -14,6 +14,11 @@ class ChatController extends GetxController {
 
   final messages = <Message>[].obs;
   String _messageBuffer = '';
+  bool isUploading = false;
+  void uploadingStart() => isUploading = true;
+  void uploadingEnd() => isUploading = false;
+
+  bool get canShow => isUploading == false;
 
   final TextEditingController textEditingController = TextEditingController();
   RxBool isTyping = false.obs;
@@ -110,6 +115,7 @@ class ChatController extends GetxController {
     for (var element in images) {
       data.addAll(element);
     }
+    uploadingStart();
     sendCustomMessage("A");
     await Future.delayed(const Duration(seconds: 1));
 
@@ -118,7 +124,10 @@ class ChatController extends GetxController {
     String arResp = "yes";
     sendCustomMessage(msg);
     resp = await waitTillMessageRecive();
-    if (resp != arResp) return false;
+    if (resp != arResp) {
+      uploadingEnd();
+      return false;
+    }
 
     // send and recive Message Length
     final char = String.fromCharCode(images.length);
@@ -127,7 +136,10 @@ class ChatController extends GetxController {
     await Future.delayed(const Duration(seconds: 1));
     sendCustomMessage(msg);
     resp = await waitTillMessageRecive();
-    if (resp != arResp) return false;
+    if (resp != arResp) {
+      uploadingEnd();
+      return false;
+    }
 
     await Future.delayed(const Duration(seconds: 1));
 
@@ -154,13 +166,20 @@ class ChatController extends GetxController {
             dismissDirection: DismissDirection.down,
           );
           sendCustomMessage("?");
+          uploadingEnd();
           break;
         }
         // await Future.delayed(const Duration(milliseconds: 200));
       }
       sendCustomMessage("?");
+      uploadingEnd();
+
+      Future.delayed(const Duration(seconds: 2)).then((value) {
+        sendCustomMessage("Display Image");
+      });
       return true;
     } catch (e) {
+      uploadingEnd();
       // Ignore error, but notify state
       doUpdate();
       return false;
@@ -176,16 +195,9 @@ class ChatController extends GetxController {
     isTyping.value = false;
     connection!.output.add(Uint8List.fromList(utf8.encode("$text\n")));
     await connection!.output.allSent;
-
-    messages.add(Message(clientID, text.toString()));
-
-    // Future.delayed(const Duration(milliseconds: 333)).then((_) {
-    //   listScrollController.animateTo(
-    //     listScrollController.position.maxScrollExtent,
-    //     duration: const Duration(milliseconds: 333),
-    //     curve: Curves.easeOut,
-    //   );
-    // });
+    if (canShow) {
+      messages.add(Message(clientID, text.toString()));
+    }
   }
 
   void onDataReceived(Uint8List data) {
@@ -222,13 +234,15 @@ class ChatController extends GetxController {
       recivedMessage = recivedMessage.trim();
       print('Value we recive from ardunio is $recivedMessage');
       messageRecive(recivedMessage);
+      if (canShow) {
+        messages.add(
+          Message(
+            1,
+            recivedMessage,
+          ),
+        );
+      }
 
-      messages.add(
-        Message(
-          1,
-          recivedMessage,
-        ),
-      );
       _messageBuffer = dataString.substring(index);
     } else {
       _messageBuffer = (backspacesCounter > 0
