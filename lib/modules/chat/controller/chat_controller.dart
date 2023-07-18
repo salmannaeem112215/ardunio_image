@@ -33,8 +33,7 @@ class ChatController extends GetxController {
     latestMessageRecive = !latestMessageRecive;
   }
 
-  Future<String> waitTillMessageRecive() async {
-    int delay = 100;
+  Future<String> waitTillMessageRecive({int delay = 100}) async {
     bool prevState = latestMessageRecive;
     while (prevState == latestMessageRecive && delay > 0) {
       print('12');
@@ -160,15 +159,34 @@ class ChatController extends GetxController {
         final res = await waitTillMessageRecive();
 
         if (res != chunk.length.toString()) {
-          Get.snackbar(
-            'Error',
-            'Upload Again - Data Missed',
-            dismissDirection: DismissDirection.down,
-          );
-          sendCustomMessage("?");
-          uploadingEnd();
-          break;
+          if (res == "pause") {
+            timeToW8.value += 60;
+            final rMessage =
+                await waitTillMessageRecive(delay: 60 * 20); // max 1 min w8
+            timeToW8.value -= 60;
+
+            if (rMessage != chunk.length.toString()) {
+              Get.snackbar(
+                'Error',
+                'Upload Again - Data Missed',
+                dismissDirection: DismissDirection.down,
+              );
+              sendCustomMessage("?");
+              uploadingEnd();
+              break;
+            }
+          } else {
+            Get.snackbar(
+              'Error',
+              'Upload Again - Data Missed',
+              dismissDirection: DismissDirection.down,
+            );
+            sendCustomMessage("?");
+            uploadingEnd();
+            break;
+          }
         }
+
         // await Future.delayed(const Duration(milliseconds: 200));
       }
       sendCustomMessage("?");
