@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:ardunio_image/headers.dart';
 import 'package:ardunio_image/modules/image/screen/image_viewer.dart';
 
@@ -35,8 +33,12 @@ class ImageScreen extends StatelessWidget {
                         ic.count.value;
                         ic.selectedImages.length;
                         print('DEBUG:    ${ic.selectedImages.length}');
-                        if (ic.state.value == ImageState.select) {
+                        if (ic.state.value == ImageState.select ||
+                            ic.selectedImages.isEmpty) {
                           return const NoImage();
+                        }
+                        if (ic.state.value == ImageState.uploading) {
+                          return const Uploading();
                         }
                         return ImageViewer(
                           key: Key(ic.count.toString()),
@@ -45,34 +47,6 @@ class ImageScreen extends StatelessWidget {
                           width: ic.width,
                         );
                       }),
-                      // child: Obx(() {
-                      //   final state = ic.state.value;
-                      //   if (state == ImageState.uploading) {
-                      //     return const Uploading();
-                      //   }
-                      //   if (state == ImageState.select ||
-                      //       ic.selectedImagePath.value.isEmpty) {
-                      //     return const NoImage();
-                      //   }
-                      //   if (state == ImageState.selected) {
-                      //     return Container(
-                      //       decoration: BoxDecoration(
-                      //           color: Colors.black12,
-                      //           border: Border.all(
-                      //             color: Colors.black54,
-                      //             width: 3,
-                      //           )),
-                      //       height: (context.width - 32) * ic.height / ic.width,
-                      //       child: Image.file(
-                      //         File(ic.selectedImagePath.value),
-                      //         fit: BoxFit.contain,
-                      //         // To make it pixel Look
-                      //         filterQuality: FilterQuality.none,
-                      //       ),
-                      //     );
-                      //   }
-                      //   return const NoImage();
-                      // }),
                     ),
                   ),
                 ],
@@ -82,13 +56,15 @@ class ImageScreen extends StatelessWidget {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.copy)),
-          const FloatingActionButtons(),
-        ],
-      ),
+      floatingActionButton: const FloatingActionButtons(),
+
+      //  Row(
+      //   mainAxisSize: MainAxisSize.min,
+      //   children: [
+      //     IconButton(onPressed: () {}, icon: Icon(Icons.copy)),
+      //     const FloatingActionButtons(),
+      //   ],
+      // ),
     );
   }
 }

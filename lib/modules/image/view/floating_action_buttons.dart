@@ -14,18 +14,6 @@ class FloatingActionButtons extends StatelessWidget {
           GallaryButton(
             img: IconPath.openGallary,
             onTap: ic.convertImage,
-
-            // () async {
-            //   // Get.back();
-            //   ic.state.value = ImageState.select;
-            //   final list = await ic.getImage(ImageSource.gallery);
-            //   if (list.isEmpty) {
-            //     ic.state.value = ImageState.select;
-            //   } else {
-            //     ic.state.value = ImageState.selected;
-            //     copyDataToClipboard(list);
-            //   }
-            // },
           ),
           const SizedBox(width: 20),
           if (ic.state.value != ImageState.select)
