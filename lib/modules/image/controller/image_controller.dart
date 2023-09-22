@@ -7,10 +7,13 @@ enum ImageState { select, selected, processing, uploading, completed }
 class ImageController extends GetxController {
   GlobalKey one = GlobalKey();
   final state = ImageState.select.obs;
-  int height = 16;
-  int width = 16;
+  final count = 0.obs;
+  int height = 8;
+  int width = 8;
   final selectedImagePath = ''.obs;
   final List<Uint8List> imagesList = [];
+  final selectedImages = <Uint8List>[].obs;
+  final selectedImage = <imagi.Image>[].obs;
 
   Future<List<Uint8List>> getImage(
     ImageSource imageSource,
@@ -117,7 +120,22 @@ class ImageController extends GetxController {
     return pickedFile.path;
   }
 
+  newCropFile() async {}
+
   Future<CroppedFile?> _cropFile(String filePath) async {
+    final image = await imagi.decodeImageFile(filePath);
+    print(
+        "DEBUG: Length is ${image!.getBytes().length}   ${image.frames.length}");
+
+    final cImage = imagi.copyResize(
+      image!,
+      width: 8,
+      height: 8,
+    );
+
+    final l = cImage.getBytes().length;
+    print("DEBUG: Length is $l   ${cImage.numFrames}");
+
     return await ImageCropper().cropImage(
       sourcePath: filePath,
       maxHeight: height,
@@ -148,15 +166,28 @@ class ImageController extends GetxController {
     return val == false ? null : targetPath;
   }
 
+  String imgPath({int no = 0}) {
+    final dir = Directory.systemTemp;
+    final targetPath = '${dir.absolute.path}/store_temp-$no.jpeg';
+    return targetPath;
+  }
+
   String uint8ToString(Uint8List img) {
+    print("Called");
     String val = '';
-    for (int i = 0; i < img.length; i += 3) {
+    int length = img.length;
+    int totalPixels = img.length ~/ 3;
+    for (int i = 0; i < length; i += 3) {
       val +=
-          '0x${intToHex(img[i])}${intToHex(img[i + 1])}${intToHex(img[i + 2])}, ';
-      if (i % 16 == 0 && i != 0) {
-        val += '\n';
+          '0x${intToHex(img[i])}${intToHex(img[i + 1])}${intToHex(img[i + 2])}';
+      int index = (i + 3) ~/ 3;
+      if (index % width == 0) {
+        val += index == totalPixels ? '\n' : ', \n';
+      } else {
+        val += ', ';
       }
     }
+    print("length  ${length}");
     return val;
   }
 
@@ -166,5 +197,54 @@ class ImageController extends GetxController {
     }
     String hexString = n.toRadixString(16).toUpperCase();
     return hexString.padLeft(2, '0');
+  }
+
+  convertImage() async {
+    try {
+      state.value = ImageState.select;
+      final pFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (pFile == null) return;
+
+      imagi.Image image;
+      if (pFile.path.contains('.gif')) {
+        // IS GIF
+        print("DEBUG: is GIF");
+        final img = await imagi.decodeGifFile(pFile.path);
+        if (img == null) return;
+        image = img;
+      } else {
+        // IS IMAGE
+        print("DEBUG: is Image");
+        final img = await imagi.decodeImageFile(pFile.path);
+        if (img == null) return;
+        image = img;
+      }
+
+      print("DEBUG: FRAMSES  ${image.frames.length}");
+      List<Uint8List> images = [];
+
+      for (int i = 0; i < image.frames.length; i++) {
+        final img = image.getFrame(i);
+        final cImage = imagi.copyResize(img, height: height, width: width);
+        final cPath = await _storeFile(cImage, no: i);
+        final data = await _imageToUint8List(File(cPath!));
+        print("DEBUG: ADDED IMAGE $i   ${data.length}");
+        images.add(data);
+      }
+
+      selectedImages.clear();
+      selectedImages.assignAll(images);
+      count.value++;
+
+      // for (int i = 0; i < selectedImages.length; i++) {
+      //   final s = uint8ToString(selectedImages[i]);
+      //   print("S   $s");
+      // }
+      state.value = ImageState.selected;
+
+      copyDataToClipboard(selectedImages);
+    } catch (e) {
+      print("DEBUG: ERROR HERE $e");
+    }
   }
 }

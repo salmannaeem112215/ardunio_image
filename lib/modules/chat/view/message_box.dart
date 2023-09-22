@@ -62,7 +62,9 @@ class MessageBox extends StatelessWidget {
                   icon: const Icon(Icons.image),
                   onPressed: cc.isConnected
                       ? () => Get.toNamed(AppPages.image)
-                      : null),
+                      : () => Get.toNamed(AppPages.image)
+                  // :null
+                  ),
             );
           }
         }),
